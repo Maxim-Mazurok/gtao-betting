@@ -4,8 +4,8 @@ Testing strategies of betting on horse races in GTA Online. Calculating adjusted
 
 ## Getting Started
 
-1. `git clone ...`
-1. `cd ...`
+1. `git clone https://github.com/Maxim-Mazurok/gtao-betting`
+1. `cd gtao-betting`
 1. `nvm i`
 1. `npm ci`
 1. `npx vitest`
