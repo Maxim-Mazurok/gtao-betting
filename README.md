@@ -2,13 +2,26 @@
 
 Testing strategies of betting on horse races in GTA Online. Calculating adjusted advantage compared to the odds and using Kelly Criterion to determine bet size, then simulating games.
 
+Also automates betting in the game using python. Game is expected to run in Windowed mode with 1280x1024 resolution and English language.
+
+Both are working, but still work in progress.
+
 ## Getting Started
 
 1. `git clone https://github.com/Maxim-Mazurok/gtao-betting`
 1. `cd gtao-betting`
+
+### Simulation
+
 1. `nvm i` - optional
 1. `npm ci`
 1. `npx vitest`
+
+### Automation
+
+1. `cd automation`
+1. `pip install -r requirements.txt`
+1. `python main.py`
 
 See also my personal spreadsheet: https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit?usp=sharing
 
