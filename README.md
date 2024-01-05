@@ -15,7 +15,7 @@ Both are working, but still work in progress.
 
 1. `nvm i` - optional
 1. `npm ci`
-1. `npx vitest`
+1. `npm test`
 
 ### Automation
 
