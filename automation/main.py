@@ -11,7 +11,8 @@ import keyboard
 
 PAUSED = False
 
-GAME_TITLE = 'Grand Theft Auto V'
+# GAME_TITLE = 'Grand Theft Auto V'
+GAME_TITLE = 'FiveM'
 
 # (left, upper, right, lower); use https://www.image-map.net/ and flip upper and lower if needed
 SELECT_GAME_CROP = (751, 782, 1209, 880)
@@ -51,6 +52,8 @@ PLACE_BET_NAME = "5_PLACE_BET"
 BET_AGAIN_CROP = (412, 900, 864, 988)
 BET_AGAIN_NAME = "6_BET_AGAIN"
 
+WINNER_ODDS_CROP = (435, 668, 560, 736)
+
 reader = easyocr.Reader(['en'], gpu=False, verbose=False)
 with open('../horses.txt', 'r') as file:
     horses = file.read().split('\n')
@@ -61,6 +64,12 @@ def pause_key_is_pressed():
     if keyboard.is_pressed('T'):
         return True
     return False
+
+
+def save_crop(crop_coords, name):
+    screen = capture_game_screen()
+    crop = screen.crop(crop_coords)
+    crop.save(name + '.png')
 
 
 def wait_for_window(title, timeout=None):
@@ -104,7 +113,7 @@ def activate_game_window():
         print(f"An error occurred: {e}")
 
 
-def capture_game_screen():
+def capture_game_screen(save_screen=False):
     if PAUSED:
         return None
     try:
@@ -135,8 +144,9 @@ def capture_game_screen():
             screenshot = pyautogui.screenshot(
                 region=(screen_left, screen_top, width, height))
 
-            # Save or process the screenshot
-            # screenshot.save('screenshot.png')
+            if save_screen:
+                # Save or process the screenshot
+                screenshot.save('screenshot.png')
             return screenshot
         else:
             print(f"{GAME_TITLE} window not found.")
@@ -340,18 +350,22 @@ def bet_again():
 def select_bet_amount():
     wait_for_text("PLACE BET", PLACE_BET_CROP)
     time.sleep(0.5)
-    # for _ in range(27):
-    #     click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
-    #     time.sleep(0.1)
-    click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'down')
-    time.sleep(8)
-    click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'up')
+
+    if GAME_TITLE == 'FiveM':
+        for _ in range(13):
+            click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
+            time.sleep(0.1)
+    else:
+        click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'down')
+        time.sleep(8)
+        click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'up')
 
 
 def main():
     global PAUSED
 
-    # capture_game_screen()
+    # capture_game_screen(True)
+    # exit()
     # visualize_all_crops()
     test_detect_horse()
 
@@ -362,14 +376,45 @@ def main():
     while (True):
         if not PAUSED:
             activate_game_window()
-            select_game()
-            select_horse()
-            select_bet_amount()
+
+            if not (GAME_TITLE == 'FiveM' and games_played > 0):
+                select_game()
+
+            if GAME_TITLE == 'FiveM':
+                click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
+            else:
+                select_horse()
+                select_bet_amount()
+
             place_bet()
-            time.sleep(30)
             games_played += 1
-            print(f"Games played: {games_played}")
-            bet_again()
+            # print(f"Games played: {games_played}")
+
+            if GAME_TITLE == 'FiveM':
+                time.sleep(5.75 * 60)
+
+                save_crop(WINNER_ODDS_CROP,
+                          'winner_odds/winner_odds_'+str(games_played))
+
+                winner_odds = get_text_from_crop(WINNER_ODDS_CROP)
+                print(f"Winner odds: {winner_odds}")
+
+                pydirectinput.press('esc')
+
+                if games_played % 3 == 0:
+                    pydirectinput.press('esc')
+                    time.sleep(0.1)
+                    pydirectinput.press('esc')
+                    time.sleep(0.1)
+                    pydirectinput.press('esc')
+                    time.sleep(5)
+                    pydirectinput.press('e')
+                    time.sleep(5)
+                    pydirectinput.press('enter')
+                    select_game()
+
+            else:
+                bet_again()
             # TODO: record_result() ??
             # repeat...
 
