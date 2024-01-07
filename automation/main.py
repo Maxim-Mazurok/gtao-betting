@@ -40,7 +40,8 @@ GET_BALANCE_NAME = "3_GET_BALANCE"
 
 SET_BET_AMOUNT_LEFT_CROP = (688, 467, 720, 514)
 SET_BET_AMOUNT_LEFT_NAME = "4_SET_BET_AMOUNT_LEFT"
-SET_BET_AMOUNT_RIGHT_CROP = (1140, 468, 1172, 515)
+# SET_BET_AMOUNT_RIGHT_CROP = (1140, 468, 1172, 515)
+SET_BET_AMOUNT_RIGHT_CROP = (1140-150, 468, 1172-150, 515)
 SET_BET_AMOUNT_RIGHT_NAME = "4_SET_BET_AMOUNT_RIGHT"
 # TODO: maybe need to read bet amount as well?...
 
@@ -120,6 +121,9 @@ def capture_game_screen():
             # Map the client area position to the screen
             screen_left, screen_top = win32gui.ClientToScreen(
                 hwnd, (client_left, client_top))
+
+            # print(f"client_left: {screen_left}, client_top: {screen_top}")
+
             screen_right, screen_bottom = win32gui.ClientToScreen(
                 hwnd, (client_right, client_bottom))
 
@@ -189,11 +193,10 @@ def wait_for_text(text, crop_coords, timeout=None):
         found_text = get_text_from_crop(crop_coords)
         if found_text == text:
             break
-        time.sleep(0.1)
+        time.sleep(0.5)
 
 
-def click_in_the_middle_of_crop(crop_coords):
-    # FIXME: it doesn't click right in the middle ;(
+def click_in_the_middle_of_crop(crop_coords, click_type='down-and-up'):
     try:
         # Find the game window and get its handle
         window = gw.getWindowsWithTitle(GAME_TITLE)[0]
@@ -201,23 +204,34 @@ def click_in_the_middle_of_crop(crop_coords):
 
         # Get the position of the window's client area
         client_rect = win32gui.GetClientRect(hwnd)
-        client_left, client_top = win32gui.ClientToScreen(
-            hwnd, (client_rect[0], client_rect[1]))
+        client_left, client_top, client_right, client_bottom = client_rect
 
-        # Adjust crop coordinates to screen coordinates
-        screen_crop_left = client_left + crop_coords[0]
-        screen_crop_top = client_top + crop_coords[1]
-        screen_crop_right = client_left + crop_coords[2]
-        screen_crop_bottom = client_top + crop_coords[3]
+        # Map the client area position to the screen
+        screen_left, screen_top = win32gui.ClientToScreen(
+            hwnd, (client_left, client_top))
+
+        # print(f"client_left: {screen_left}, client_top: {screen_top}")
+
+        screen_right, screen_bottom = win32gui.ClientToScreen(
+            hwnd, (client_right, client_bottom))
 
         # Get the center point of the adjusted crop
         center_x, center_y = get_center_of_crop(
-            (screen_crop_left, screen_crop_top, screen_crop_right, screen_crop_bottom))
+            (crop_coords))
+
+        screen_center_x = screen_left + center_x
+        screen_center_y = screen_top + center_y
 
         # Move the mouse to the center point and click
-        pydirectinput.moveTo(center_x, center_y)
+        pydirectinput.moveTo(screen_center_x, screen_center_y)
         time.sleep(0.5)  # Small delay
-        pydirectinput.press('enter')
+
+        if click_type == 'down-and-up':
+            pydirectinput.press('enter')
+        elif click_type == 'down':
+            pydirectinput.keyDown('enter')
+        elif click_type == 'up':
+            pydirectinput.keyUp('enter')
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -264,25 +278,25 @@ def select_horse():
     # TODO: probably wait for something, like a good match maybe?
     text_1 = get_text_from_crop(SELECT_HORSE_1_CROP)
     horse_1 = detect_horse(text_1)
-    print(f"From {text_1} detected {horse_1[1]}")
+    # print(f"From {text_1} detected {horse_1[1]}")
     text_2 = get_text_from_crop(SELECT_HORSE_2_CROP)
     horse_2 = detect_horse(text_2)
-    print(f"From {text_2} detected {horse_2[1]}")
+    # print(f"From {text_2} detected {horse_2[1]}")
     text_3 = get_text_from_crop(SELECT_HORSE_3_CROP)
     horse_3 = detect_horse(text_3)
-    print(f"From {text_3} detected {horse_3[1]}")
+    # print(f"From {text_3} detected {horse_3[1]}")
     text_4 = get_text_from_crop(SELECT_HORSE_4_CROP)
     horse_4 = detect_horse(text_4)
-    print(f"From {text_4} detected {horse_4[1]}")
+    # print(f"From {text_4} detected {horse_4[1]}")
     text_5 = get_text_from_crop(SELECT_HORSE_5_CROP)
     horse_5 = detect_horse(text_5)
-    print(f"From {text_5} detected {horse_5[1]}")
+    # print(f"From {text_5} detected {horse_5[1]}")
     text_6 = get_text_from_crop(SELECT_HORSE_6_CROP)
     horse_6 = detect_horse(text_6)
-    print(f"From {text_6} detected {horse_6[1]}")
+    # print(f"From {text_6} detected {horse_6[1]}")
 
-    print(
-        f"Detected horses:\n{horse_1}\n{horse_2}\n{horse_3}\n{horse_4}\n{horse_5}\n{horse_6}\n")
+    # print(
+    #     f"Detected horses:\n{horse_1}\n{horse_2}\n{horse_3}\n{horse_4}\n{horse_5}\n{horse_6}\n")
 
     # each horse is like this: (98, 'Yellow Sunshine, 5/1')
     # select the horse with the lowest numerator
@@ -291,7 +305,7 @@ def select_horse():
     horses.sort(key=lambda x: int(x[1].split(',')[1].split(
         '/')[0]) if x[1].split(',')[1].strip() != 'EVENS' else 1)
     lowest_numerator = horses[0]
-    print(f"Selected horse: {lowest_numerator}")
+    # print(f"Selected horse: {lowest_numerator}")
 
     # click on the horse
     if lowest_numerator == horse_1:
@@ -308,17 +322,30 @@ def select_horse():
         click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
 
     # save screenshot
-    capture_game_screen().save('screenshot.png')
+    # capture_game_screen().save('screenshot.png')
 
 
 def place_bet():
     wait_for_text("PLACE BET", PLACE_BET_CROP)
+    time.sleep(0.5)
     click_in_the_middle_of_crop(PLACE_BET_CROP)
 
 
 def bet_again():
     wait_for_text("BET AGAIN", BET_AGAIN_CROP)
+    time.sleep(0.5)
     click_in_the_middle_of_crop(BET_AGAIN_CROP)
+
+
+def select_bet_amount():
+    wait_for_text("PLACE BET", PLACE_BET_CROP)
+    time.sleep(0.5)
+    # for _ in range(27):
+    #     click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
+    #     time.sleep(0.1)
+    click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'down')
+    time.sleep(8)
+    click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'up')
 
 
 def main():
@@ -328,13 +355,20 @@ def main():
     # visualize_all_crops()
     test_detect_horse()
 
+    # starting balance: 1,110,500
+    # starting time: 11:53 PM 6/01/2024
+    games_played = 0
+
     while (True):
         if not PAUSED:
             activate_game_window()
             select_game()
             select_horse()
-            # TODO: select_bet_amount()
+            select_bet_amount()
             place_bet()
+            time.sleep(30)
+            games_played += 1
+            print(f"Games played: {games_played}")
             bet_again()
             # TODO: record_result() ??
             # repeat...
