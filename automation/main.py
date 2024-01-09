@@ -393,8 +393,8 @@ def main():
             if GAME_TITLE == 'FiveM':
                 time.sleep(5.75 * 60)
 
-                save_crop(WINNER_ODDS_CROP,
-                          'winner_odds/winner_odds_'+str(games_played))
+                # save_crop(WINNER_ODDS_CROP,
+                #           'winner_odds/winner_odds_'+str(games_played))
 
                 winner_odds = get_text_from_crop(WINNER_ODDS_CROP)
                 print(f"Winner odds: {winner_odds}")
