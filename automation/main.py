@@ -173,7 +173,8 @@ def visualize_all_crops():
 
 def get_balance():
     balance = get_text_from_crop(GET_BALANCE_CROP)
-    return balance.replace('CURRENT BALANCE', '').strip()
+    # replace all non-numeric characters with empty string using regex:
+    return ''.join(filter(str.isdigit, balance))
 
 
 def get_center_of_crop(crop_coords):
@@ -387,8 +388,10 @@ def main():
                 click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
             else:
                 select_horse()
-                print(
-                    f"{get_balance()},\"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\"")
+                balance_string = f"{get_balance()},\"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\""
+                print(balance_string)
+                with open('log.csv', 'a') as file:
+                    file.write(balance_string + '\n')
                 select_bet_amount()
 
             place_bet()
