@@ -11,8 +11,8 @@ import keyboard
 
 PAUSED = False
 
-# GAME_TITLE = 'Grand Theft Auto V'
-GAME_TITLE = 'FiveM'
+GAME_TITLE = 'Grand Theft Auto V'
+# GAME_TITLE = 'FiveM'
 
 # (left, upper, right, lower); use https://www.image-map.net/ and flip upper and lower if needed
 SELECT_GAME_CROP = (751, 782, 1209, 880)
@@ -169,6 +169,11 @@ def visualize_all_crops():
     visualize_crop(SET_BET_AMOUNT_RIGHT_NAME, SET_BET_AMOUNT_RIGHT_CROP)
     visualize_crop(PLACE_BET_NAME, PLACE_BET_CROP)
     visualize_crop(BET_AGAIN_NAME, BET_AGAIN_CROP)
+
+
+def get_balance():
+    balance = get_text_from_crop(GET_BALANCE_CROP)
+    return balance.replace('CURRENT BALANCE', '').strip()
 
 
 def get_center_of_crop(crop_coords):
@@ -369,8 +374,6 @@ def main():
     # visualize_all_crops()
     test_detect_horse()
 
-    # starting balance: 1,110,500
-    # starting time: 11:53 PM 6/01/2024
     games_played = 0
 
     while (True):
@@ -384,6 +387,8 @@ def main():
                 click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
             else:
                 select_horse()
+                print(
+                    f"{get_balance()},\"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\"")
                 select_bet_amount()
 
             place_bet()
