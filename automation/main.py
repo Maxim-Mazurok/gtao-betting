@@ -49,8 +49,17 @@ SET_BET_AMOUNT_RIGHT_NAME = "4_SET_BET_AMOUNT_RIGHT"
 PLACE_BET_CROP = (632, 703, 1218, 793)
 PLACE_BET_NAME = "5_PLACE_BET"
 
+FIRST_PLACE_CROP = (433, 491, 844, 572)
+FIRST_PLACE_NAME = "6_1_PLACE"
+
+SECOND_PLACE_CROP = (1, 489, 343, 555)
+SECOND_PLACE_NAME = "6_2_PLACE"
+
+THIRD_PLACE_CROP = (922, 488, 1279, 557)
+THIRD_PLACE_NAME = "6_3_PLACE"
+
 BET_AGAIN_CROP = (412, 900, 864, 988)
-BET_AGAIN_NAME = "6_BET_AGAIN"
+BET_AGAIN_NAME = "7_BET_AGAIN"
 
 WINNER_ODDS_CROP = (435, 668, 560, 736)
 
@@ -168,6 +177,9 @@ def visualize_all_crops():
     visualize_crop(SET_BET_AMOUNT_LEFT_NAME, SET_BET_AMOUNT_LEFT_CROP)
     visualize_crop(SET_BET_AMOUNT_RIGHT_NAME, SET_BET_AMOUNT_RIGHT_CROP)
     visualize_crop(PLACE_BET_NAME, PLACE_BET_CROP)
+    visualize_crop(FIRST_PLACE_NAME, FIRST_PLACE_CROP)
+    visualize_crop(SECOND_PLACE_NAME, SECOND_PLACE_CROP)
+    visualize_crop(THIRD_PLACE_NAME, THIRD_PLACE_CROP)
     visualize_crop(BET_AGAIN_NAME, BET_AGAIN_CROP)
 
 
@@ -240,7 +252,7 @@ def click_in_the_middle_of_crop(crop_coords, click_type='down-and-up'):
 
         # Move the mouse to the center point and click
         pydirectinput.moveTo(screen_center_x, screen_center_y)
-        time.sleep(0.5)  # Small delay
+        time.sleep(0.1)  # Small delay
 
         if click_type == 'down-and-up':
             pydirectinput.press('enter')
@@ -278,6 +290,17 @@ def find_best_match(ocr_line, reference_lines):
     return best_match
 
 
+def record_results():
+    wait_for_text("BET AGAIN", BET_AGAIN_CROP)
+    first_place = detect_horse(get_text_from_crop(FIRST_PLACE_CROP))
+    second_place = detect_horse(get_text_from_crop(SECOND_PLACE_CROP))
+    third_place = detect_horse(get_text_from_crop(THIRD_PLACE_CROP))
+    result = f"{first_place[0]},\"{first_place[1]}\",{second_place[0]},\"{second_place[1]}\",{third_place[0]},\"{third_place[1]}\""
+    print(result)
+    with open('results_log.csv', 'a') as file:
+        file.write(result + '\n')
+
+
 def detect_horse(ocr_input):
     return find_best_match(ocr_input, horses)
 
@@ -313,6 +336,10 @@ def select_horse():
 
     # print(
     #     f"Detected horses:\n{horse_1}\n{horse_2}\n{horse_3}\n{horse_4}\n{horse_5}\n{horse_6}\n")
+    line_up = f"{horse_1[0]},\"{horse_1[1]}\"{horse_2[0]},\"{horse_2[1]}\"{horse_3[0]},\"{horse_3[1]}\"{horse_4[0]},\"{horse_4[1]}\"{horse_5[0]},\"{horse_5[1]}\"{horse_6[0]},\"{horse_6[1]}\""
+    print(line_up)
+    with open('line_up_log.csv', 'a') as file:
+        file.write(line_up + '\n')
 
     # each horse is like this: (98, 'Yellow Sunshine, 5/1')
     # select the horse with the lowest numerator
@@ -362,9 +389,11 @@ def select_bet_amount():
             click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
             time.sleep(0.1)
     else:
-        click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'down')
-        time.sleep(8)
-        click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'up')
+        # click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'down')
+        # time.sleep(8)
+        # click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP, 'up')
+        for _ in range(27):
+            click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
 
 
 def main():
@@ -373,6 +402,7 @@ def main():
     # capture_game_screen(True)
     # exit()
     # visualize_all_crops()
+    # exit()
     test_detect_horse()
 
     games_played = 0
@@ -401,9 +431,6 @@ def main():
             if GAME_TITLE == 'FiveM':
                 time.sleep(5.75 * 60)
 
-                # save_crop(WINNER_ODDS_CROP,
-                #           'winner_odds/winner_odds_'+str(games_played))
-
                 winner_odds = get_text_from_crop(WINNER_ODDS_CROP)
                 print(f"Winner odds: {winner_odds}")
 
@@ -422,6 +449,8 @@ def main():
                     select_game()
 
             else:
+                time.sleep(30)
+                record_results()
                 bet_again()
             # TODO: record_result() ??
             # repeat...
