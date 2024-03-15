@@ -280,8 +280,8 @@ export const main = async () => {
   const startingMoney = 10760400;
   let currentMoney = startingMoney;
 
-  // const getBet = getBetKelly;
-  const getBet = getBetFavourite;
+  // const getBet = getBetKelly; // https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=1200825551
+  const getBet = getBetFavourite; // https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=406308781
 
   for (let i = 0; i < totalGames; i++) {
     currentMoney += playGame(getBet, currentMoney, historicalData[i]);
