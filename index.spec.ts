@@ -1,12 +1,14 @@
-import { expect, it } from "vitest";
+import { expect, it, describe } from "vitest";
 import {
+  Horse,
+  calculateNetWinnings,
   convertFractionOddsToDecimal,
   convertFractionOddsToPercentage,
   main,
 } from ".";
 
-it("works", () => {
-  main();
+it("works", async () => {
+  await main();
 });
 
 it("converts odds", () => {
@@ -19,4 +21,67 @@ it("converts odds", () => {
   // https://www.aceodds.com/bet-calculator/odds-converter.html
   expect(convertFractionOddsToPercentage(5, 2).toFixed(3)).toBe("0.286");
   expect(convertFractionOddsToDecimal(5, 2)).toBe(3.5);
+});
+
+describe("calculates winnings", () => {
+  it("winner evens", () => {
+    const betHorse: Horse = {
+      oddsNumerator: 1,
+      oddsDenominator: 1,
+      name: "even",
+      group: "favourites",
+    };
+    const winner = betHorse;
+    expect(
+      calculateNetWinnings(
+        {
+          horse: betHorse,
+          amount: 100,
+        },
+        winner
+      )
+    ).toBe(100);
+  });
+
+  it("winner 2/1", () => {
+    const betHorse: Horse = {
+      oddsNumerator: 2,
+      oddsDenominator: 1,
+      name: "2x",
+      group: "favourites",
+    };
+    const winner = betHorse;
+    expect(
+      calculateNetWinnings(
+        {
+          horse: betHorse,
+          amount: 100,
+        },
+        winner
+      )
+    ).toBe(200);
+  });
+  it("loser", () => {
+    const betHorse: Horse = {
+      oddsNumerator: 2,
+      oddsDenominator: 1,
+      name: "2x",
+      group: "favourites",
+    };
+    const winner: Horse = {
+      oddsNumerator: 1,
+      oddsDenominator: 1,
+      name: "even",
+      group: "favourites",
+    };
+    expect(
+      calculateNetWinnings(
+        {
+          horse: betHorse,
+          amount: 100,
+        },
+        winner
+      )
+    ).toBe(-100);
+  });
 });

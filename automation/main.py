@@ -336,7 +336,7 @@ def select_horse():
 
     # print(
     #     f"Detected horses:\n{horse_1}\n{horse_2}\n{horse_3}\n{horse_4}\n{horse_5}\n{horse_6}\n")
-    line_up = f"{horse_1[0]},\"{horse_1[1]}\"{horse_2[0]},\"{horse_2[1]}\"{horse_3[0]},\"{horse_3[1]}\"{horse_4[0]},\"{horse_4[1]}\"{horse_5[0]},\"{horse_5[1]}\"{horse_6[0]},\"{horse_6[1]}\""
+    line_up = f"{horse_1[0]},\"{horse_1[1]}\",{horse_2[0]},\"{horse_2[1]}\",{horse_3[0]},\"{horse_3[1]}\",{horse_4[0]},\"{horse_4[1]}\",{horse_5[0]},\"{horse_5[1]}\",{horse_6[0]},\"{horse_6[1]}\""
     print(line_up)
     with open('line_up_log.csv', 'a') as file:
         file.write(line_up + '\n')
