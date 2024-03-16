@@ -120,6 +120,8 @@ const playGame = (
   const lineUp = overrides?.lineUp ?? generateLineUp();
   const bet = getBet(lineUp, currentMoney);
 
+  if (!bet.amount) throw new Error("bet amount not defined");
+  if (!bet.horse) throw new Error("bet horse not defined");
   if (bet.amount > 10_000) throw new Error("bet amount too high");
   if (bet.amount < 100) throw new Error("bet amount too low");
   if (bet.amount % 100 !== 0) throw new Error("bet amount not multiple of 100");
@@ -226,9 +228,22 @@ const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
   const maxKellyCriterion = Math.max(...kellyCriterions);
   const maxKellyCriterionIndex = kellyCriterions.indexOf(maxKellyCriterion);
   const horse = lineUp[maxKellyCriterionIndex];
+  const adjustedChance = chances[maxKellyCriterionIndex];
+
+  // console.log("maxKellyCriterion,", maxKellyCriterion);
+
+  // console.log("adjusted chance", adjustedChance);
+
+  // console.log(
+  //   "odds",
+  //   convertFractionOddsToPercentage(horse.oddsNumerator, horse.oddsDenominator)
+  // );
 
   const getAmount = () => {
-    if (maxKellyCriterion <= 0) return 100;
+    if (maxKellyCriterion <= 0) {
+      // console.log("maxKellyCriterion <= 0, ", maxKellyCriterion);
+      return 100;
+    }
 
     let amount = 0;
     // const kellyAmount = Math.min(44_000, currentMoney) * maxKellyCriterion;
@@ -284,7 +299,9 @@ export const main = async () => {
   const getBet = getBetFavourite; // https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=406308781
 
   for (let i = 0; i < totalGames; i++) {
-    currentMoney += playGame(getBet, currentMoney, historicalData[i]);
+    const result = playGame(getBet, currentMoney, historicalData[i]);
+    currentMoney += result;
+    // console.log(result);
     console.log(currentMoney);
     if (currentMoney <= 0) {
       console.log(`bankrupt in ${i} games`);
