@@ -230,13 +230,12 @@ const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
   const horse = lineUp[maxKellyCriterionIndex];
   const adjustedChance = chances[maxKellyCriterionIndex];
 
-  // console.log("maxKellyCriterion,", maxKellyCriterion);
-
-  // console.log("adjusted chance", adjustedChance);
-
+  // TODO: uncomment for distribution charts
   // console.log(
-  //   "odds",
-  //   convertFractionOddsToPercentage(horse.oddsNumerator, horse.oddsDenominator)
+  //   `${maxKellyCriterion},${adjustedChance},${convertFractionOddsToPercentage(
+  //     horse.oddsNumerator,
+  //     horse.oddsDenominator
+  //   )}`
   // );
 
   const getAmount = () => {
@@ -260,44 +259,45 @@ const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
 
   const amount = getAmount();
 
-  // console.log(kellyCriterions, amount);
-
-  // return {
-  //   horse: lineUp[0],
-  //   amount: 1_000,
-  // };
-
   return {
     horse,
     amount,
   };
 };
 
-const getBetFavourite = (lineUp: LineUp) => {
-  const favourite = lineUp.sort(
-    (a, b) =>
-      convertFractionOddsToDecimal(a.oddsNumerator, a.oddsDenominator) -
-      convertFractionOddsToDecimal(b.oddsNumerator, b.oddsDenominator)
-  )[0];
-  const amount = 10_000;
-  // console.log(lineUp, favourite);
+const getXthFavourite =
+  (x = 0) =>
+  (lineUp: LineUp) => {
+    const favourite = lineUp.sort(
+      (a, b) =>
+        convertFractionOddsToDecimal(a.oddsNumerator, a.oddsDenominator) -
+        convertFractionOddsToDecimal(b.oddsNumerator, b.oddsDenominator)
+    )[x];
+    const amount = 10_000;
+    // console.log(lineUp, favourite);
 
-  return {
-    horse: favourite,
-    amount,
+    return {
+      horse: favourite,
+      amount,
+    };
   };
-};
 
 export const main = async () => {
   const historicalData = await getHistoricalData();
   // const historicalData = shuffle(await getHistoricalData());
   const totalGames = historicalData.length ?? 50;
-  const startingMoney = 10760400;
+  const startingMoney = 10_000_000;
   let currentMoney = startingMoney;
 
   // const getBet = getBetKelly; // https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=1200825551
-  const getBet = getBetFavourite; // https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=406308781
+  // const getBet = getXthFavourite(0);
+  // const getBet = getXthFavourite(1);
+  // const getBet = getXthFavourite(2);
+  // const getBet = getXthFavourite(3);
+  // const getBet = getXthFavourite(4);
+  const getBet = getXthFavourite(5);
 
+  console.log(currentMoney);
   for (let i = 0; i < totalGames; i++) {
     const result = playGame(getBet, currentMoney, historicalData[i]);
     currentMoney += result;
@@ -309,11 +309,11 @@ export const main = async () => {
     }
   }
 
-  console.log(
-    `${startingMoney.toLocaleString()} => ${Math.round(
-      currentMoney
-    ).toLocaleString()}`
-  );
+  // console.log(
+  //   `${startingMoney.toLocaleString()} => ${Math.round(
+  //     currentMoney
+  //   ).toLocaleString()}`
+  // );
 };
 
 // basically the goal will be to find which horse will provide the closest match in bet for Kelly Criterion
@@ -337,3 +337,5 @@ function shuffle(array) {
 
   return array;
 }
+
+main();
