@@ -396,6 +396,10 @@ def select_bet_amount():
             click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
 
 
+# seems like 1h per day is the limit for GTAO before you get banned from betting for about 1-1.5 weeks
+SESSION_LIMIT_HOURS = 0.95
+
+
 def main():
     global PAUSED
 
@@ -406,6 +410,7 @@ def main():
     test_detect_horse()
 
     games_played = 0
+    start_time = time.time()
 
     while (True):
         if not PAUSED:
@@ -452,8 +457,10 @@ def main():
                 time.sleep(30)
                 record_results()
                 bet_again()
-            # TODO: record_result() ??
-            # repeat...
+
+        if time.time() - start_time > SESSION_LIMIT_HOURS * 60 * 60:
+            print(f"Session limit of {SESSION_LIMIT_HOURS} hours reached.")
+            break
 
         if pause_key_is_pressed():
             if PAUSED:
