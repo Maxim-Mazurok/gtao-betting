@@ -2,6 +2,8 @@ import { expect, it, describe } from "vitest";
 import {
   Horse,
   adjustChancesEqually,
+  adjustChancesToFirstHorse,
+  adjustGoodChancesToFirstHorseAndBadChancesToLast,
   calculateNetWinnings,
   convertFractionOddsToDecimal,
   convertFractionOddsToPercentage,
@@ -11,8 +13,14 @@ import {
 } from ".";
 
 it("works", async () => {
-  await main(getBetKelly, false);
-  await main(getXthFavourite(0), true);
+  await main(getBetKelly(false), false);
+  await main(getXthFavourite(0, false), false);
+
+  // await main(getBetKelly(true), false);
+  await main(getBetKelly(false), true);
+  // await main(getXthFavourite(0), true);
+  // await main(getXthFavourite(0, true), false);
+  // await main(getXthFavourite(0, false), true);
 });
 
 it("converts odds", () => {
@@ -118,6 +126,114 @@ describe("adjust odds equally", () => {
       [
         0.015,
         0.985,
+      ]
+    `);
+  });
+});
+
+describe("adjust odds to first horse", () => {
+  it("works for smaller", () => {
+    const chances = [30, 30];
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.7,
+        0.3,
+      ]
+    `);
+  });
+  it("works for higher", () => {
+    const chances = [80, 80];
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.2,
+        0.8,
+      ]
+    `);
+  });
+  it("works for much higher", () => {
+    const chances = [20, 120];
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0,
+        1,
+      ]
+    `);
+  });
+  it("works for much higher", () => {
+    const chances = [20, 80, 90];
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0,
+        0.1,
+        0.9,
+      ]
+    `);
+  });
+  it("works for very different", () => {
+    const chances = [1, 98];
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.02,
+        0.98,
+      ]
+    `);
+  });
+});
+
+describe("adjustGoodChancesToFirstHorseAndBadChancesToLast", () => {
+  it("works for smaller", () => {
+    const chances = [30, 30];
+    const adjusted = adjustGoodChancesToFirstHorseAndBadChancesToLast(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.7,
+        0.3,
+      ]
+    `);
+  });
+  it("works for higher", () => {
+    const chances = [80, 80];
+    const adjusted = adjustGoodChancesToFirstHorseAndBadChancesToLast(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.8,
+        0.2,
+      ]
+    `);
+  });
+  it("works for much higher", () => {
+    const chances = [20, 120];
+    const adjusted = adjustGoodChancesToFirstHorseAndBadChancesToLast(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.2,
+        0.8,
+      ]
+    `);
+  });
+  it("works for much higher", () => {
+    const chances = [20, 80, 90];
+    const adjusted = adjustGoodChancesToFirstHorseAndBadChancesToLast(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.2,
+        0.8,
+        0,
+      ]
+    `);
+  });
+  it("works for very different", () => {
+    const chances = [1, 98];
+    const adjusted = adjustGoodChancesToFirstHorseAndBadChancesToLast(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.02,
+        0.98,
       ]
     `);
   });

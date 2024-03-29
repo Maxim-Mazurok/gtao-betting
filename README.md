@@ -40,6 +40,7 @@ See also my personal spreadsheet: https://docs.google.com/spreadsheets/d/1z27GEy
 ## Notes
 
 - Seems like the game doesn't actually use suggested chances adjustments. For example, for 371 games, the average adjusted odds for evens were 48% but the actual win rate of evens was 65%, see [Podium Frequency Chart - 2](https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=384889435)
+- It looks like `adjustChancesToFirstHorse` + `getXthFavourite(0)` results in Adjusted Expected Wins to follow Actual Wins. But it doesn't work with `getBetKelly`, so maybe I figured out how to calculate odds for the first best horse, but not for the rest. Maybe try a strategy that re-allocates chances per group?
 
 ## ToDo
 

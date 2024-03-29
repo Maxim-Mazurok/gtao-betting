@@ -74,6 +74,43 @@ export const adjustChancesEqually = (chances: number[]) => {
     .map((x) => x / 100);
 };
 
+export const adjustChancesToFirstHorse = (chances: number[]) => {
+  const totalOddsChance = chances.reduce((a, b) => a + b, 0);
+  let diff = 100 - totalOddsChance;
+  for (let i = 0; i < chances.length; i++) {
+    if (diff < 0) {
+      const subtract = Math.min(-diff, chances[i]);
+      chances[i] -= subtract;
+      diff += subtract;
+    } else {
+      chances[i] += diff;
+      diff = 0;
+    }
+  }
+  return chances.map((x) => x / 100);
+};
+
+export const adjustGoodChancesToFirstHorseAndBadChancesToLast = (
+  chances: number[]
+) => {
+  const totalOddsChance = chances.reduce((a, b) => a + b, 0);
+  let diff = 100 - totalOddsChance;
+  const shouldReverse = diff < 0;
+  if (shouldReverse) chances = chances.reverse();
+  for (let i = 0; i < chances.length; i++) {
+    if (diff < 0) {
+      const subtract = Math.min(-diff, chances[i]);
+      chances[i] -= subtract;
+      diff += subtract;
+    } else {
+      chances[i] += diff;
+      diff = 0;
+    }
+  }
+  if (shouldReverse) chances = chances.reverse();
+  return chances.map((x) => x / 100);
+};
+
 const adjustChancesProportionally = (chances: number[]) => {
   const totalOddsChance = chances.reduce((a, b) => a + b, 0);
   return chances.map((chance) => chance / totalOddsChance);
@@ -85,6 +122,9 @@ const calculateChances = (lineUp: LineUp): number[] => {
   );
   const oddsChances = decimalOdds.map((odds) => 100 / odds);
   const adjustedChances = adjustChancesProportionally(oddsChances);
+  // const adjustedChances = adjustChancesToFirstHorse(oddsChances);
+  // const adjustedChances =
+  //   adjustGoodChancesToFirstHorseAndBadChancesToLast(oddsChances);
   // const adjustedChances = adjustChancesEqually(oddsChances);
 
   return adjustedChances;
@@ -225,63 +265,65 @@ const getHistoricalData = async (): Promise<
   }));
 };
 
-export const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
-  const kellyCriterion = (decimalOdds: number, actualProbability: number) =>
-    (decimalOdds * actualProbability - 1) / (decimalOdds - 1);
+export const getBetKelly =
+  (log = false) =>
+  (lineUp: LineUp, currentMoney: number) => {
+    const kellyCriterion = (decimalOdds: number, actualProbability: number) =>
+      (decimalOdds * actualProbability - 1) / (decimalOdds - 1);
 
-  const chances = calculateChances(lineUp);
-  const kellyCriterions = chances.map((chance, i) =>
-    kellyCriterion(
-      convertFractionOddsToDecimal(
-        lineUp[i].oddsNumerator,
-        lineUp[i].oddsDenominator
-      ),
-      chance
-    )
-  );
+    const chances = calculateChances(lineUp);
+    const kellyCriterions = chances.map((chance, i) =>
+      kellyCriterion(
+        convertFractionOddsToDecimal(
+          lineUp[i].oddsNumerator,
+          lineUp[i].oddsDenominator
+        ),
+        chance
+      )
+    );
 
-  const maxKellyCriterion = Math.max(...kellyCriterions);
-  const maxKellyCriterionIndex = kellyCriterions.indexOf(maxKellyCriterion);
-  const horse = lineUp[maxKellyCriterionIndex];
-  const adjustedChance = chances[maxKellyCriterionIndex];
+    const maxKellyCriterion = Math.max(...kellyCriterions);
+    const maxKellyCriterionIndex = kellyCriterions.indexOf(maxKellyCriterion);
+    const horse = lineUp[maxKellyCriterionIndex];
+    const adjustedChance = chances[maxKellyCriterionIndex];
 
-  // TODO: uncomment for distribution charts
-  // console.log(
-  //   `${maxKellyCriterion},${adjustedChance},${convertFractionOddsToPercentage(
-  //     horse.oddsNumerator,
-  //     horse.oddsDenominator
-  //   )}`
-  // );
+    log &&
+      console.log(
+        `${maxKellyCriterion},${adjustedChance},${convertFractionOddsToPercentage(
+          horse.oddsNumerator,
+          horse.oddsDenominator
+        )}`
+      );
 
-  const getAmount = () => {
-    if (maxKellyCriterion <= 0) {
-      // console.log("maxKellyCriterion <= 0, ", maxKellyCriterion);
-      return 100;
-    }
+    const getAmount = () => {
+      if (maxKellyCriterion <= 0) {
+        // console.log("maxKellyCriterion <= 0, ", maxKellyCriterion);
+        return 100;
+      }
 
-    let amount = 0;
-    // const kellyAmount = Math.min(44_000, currentMoney) * maxKellyCriterion;
-    const kellyAmount = currentMoney * maxKellyCriterion;
-    amount = kellyAmount;
-    amount = Math.min(amount, 10_000);
+      let amount = 0;
+      // const kellyAmount = Math.min(44_000, currentMoney) * maxKellyCriterion;
+      const kellyAmount = currentMoney * maxKellyCriterion;
+      amount = kellyAmount;
+      amount = Math.min(amount, 10_000);
 
-    if (amount < 1_000) amount = Math.ceil(amount / 100) * 100;
-    amount = Math.ceil(amount / 500) * 500;
+      if (amount < 1_000) amount = Math.ceil(amount / 100) * 100;
+      amount = Math.ceil(amount / 500) * 500;
 
-    return amount;
-    // return Math.min(amount, 50_000);
+      return amount;
+      // return Math.min(amount, 50_000);
+    };
+
+    const amount = getAmount();
+
+    return {
+      horse,
+      amount,
+    };
   };
-
-  const amount = getAmount();
-
-  return {
-    horse,
-    amount,
-  };
-};
 
 export const getXthFavourite =
-  (x = 0) =>
+  (x = 0, log = false) =>
   (lineUp: LineUp) => {
     const favourite = lineUp.sort(
       (a, b) =>
@@ -290,6 +332,14 @@ export const getXthFavourite =
     )[x];
     const amount = 10_000;
     // console.log(lineUp, favourite);
+
+    const chances = calculateChances(lineUp);
+    const adjustedChance = chances[lineUp.indexOf(favourite)];
+    const odds = convertFractionOddsToPercentage(
+      favourite.oddsNumerator,
+      favourite.oddsDenominator
+    );
+    log && console.log([odds, adjustedChance].join(","));
 
     return {
       horse: favourite,
@@ -347,7 +397,7 @@ function shuffle(array) {
 
 // (async () => {
 //   // console.log("\n\n\nkelly -----------------------------------------------")
-//   await main(getBetKelly);
+//   await main(getBetKelly(false));
 //   // console.log("\n\n\nfavourite -----------------------------------------------")
 //   // await main(getXthFavourite(0));
 //   // console.log("\n\n\n2nd favourite -----------------------------------------------")
