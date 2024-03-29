@@ -4,11 +4,12 @@ import {
   calculateNetWinnings,
   convertFractionOddsToDecimal,
   convertFractionOddsToPercentage,
+  getXthFavourite,
   main,
 } from ".";
 
 it("works", async () => {
-  await main();
+  await main(getXthFavourite(0), true);
 });
 
 it("converts odds", () => {

@@ -109,11 +109,13 @@ export const calculateNetWinnings = (
   return winnings - bet.amount;
 };
 
+type getBet = (
+  lineUp: LineUp,
+  currentMoney: number
+) => { horse: Horse; amount: number };
+
 const playGame = (
-  getBet: (
-    lineUp: LineUp,
-    currentMoney: number
-  ) => { horse: Horse; amount: number },
+  getBet: getBet,
   currentMoney: number,
   overrides?: { lineUp: LineUp; winner: Horse }
 ): number => {
@@ -265,7 +267,7 @@ const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
   };
 };
 
-const getXthFavourite =
+export const getXthFavourite =
   (x = 0) =>
   (lineUp: LineUp) => {
     const favourite = lineUp.sort(
@@ -282,27 +284,19 @@ const getXthFavourite =
     };
   };
 
-export const main = async () => {
+export const main = async (getBet: getBet, showBalance = false) => {
   const historicalData = await getHistoricalData();
   // const historicalData = shuffle(await getHistoricalData());
   const totalGames = historicalData.length ?? 50;
   const startingMoney = 10_000_000;
   let currentMoney = startingMoney;
 
-  // const getBet = getBetKelly; // https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=1200825551
-  // const getBet = getXthFavourite(0);
-  // const getBet = getXthFavourite(1);
-  // const getBet = getXthFavourite(2);
-  // const getBet = getXthFavourite(3);
-  // const getBet = getXthFavourite(4);
-  const getBet = getXthFavourite(5);
-
-  console.log(currentMoney);
+  showBalance && console.log(currentMoney);
   for (let i = 0; i < totalGames; i++) {
     const result = playGame(getBet, currentMoney, historicalData[i]);
     currentMoney += result;
     // console.log(result);
-    console.log(currentMoney);
+    showBalance && console.log(currentMoney);
     if (currentMoney <= 0) {
       console.log(`bankrupt in ${i} games`);
       break;
@@ -338,4 +332,19 @@ function shuffle(array) {
   return array;
 }
 
-main();
+// (async () => {
+//   // console.log("\n\n\nkelly -----------------------------------------------")
+//   await main(getBetKelly);
+//   // console.log("\n\n\nfavourite -----------------------------------------------")
+//   // await main(getXthFavourite(0));
+//   // console.log("\n\n\n2nd favourite -----------------------------------------------")
+//   // await main(getXthFavourite(1));
+//   // console.log("\n\n\n3rd favourite -----------------------------------------------")
+//   // await main(getXthFavourite(2));
+//   // console.log("\n\n\n4th favourite -----------------------------------------------")
+//   // await main(getXthFavourite(3));
+//   // console.log("\n\n\n5th favourite -----------------------------------------------")
+//   // await main(getXthFavourite(4));
+//   // console.log("\n\n\n6th favourite -----------------------------------------------")
+//   // await main(getXthFavourite(5));
+// })();
