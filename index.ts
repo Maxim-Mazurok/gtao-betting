@@ -90,6 +90,16 @@ export const adjustChancesToFirstHorse = (chances: number[]) => {
   return chances.map((x) => x / 100);
 };
 
+export const adjustChancesToFirstHorse2 = (chances: number[]) => {
+  const totalOddsChance = chances.reduce((a, b) => a + b, 0);
+  let diff = 100 - totalOddsChance;
+  return chances
+    .map((x) => {
+      return Math.max(0, x + diff);
+    })
+    .map((x) => x / 100);
+};
+
 export const adjustGoodChancesToFirstHorseAndBadChancesToLast = (
   chances: number[]
 ) => {
@@ -265,6 +275,13 @@ const getHistoricalData = async (): Promise<
   }));
 };
 
+export const convertScientificNotationNumber = (value: number): string => {
+  const decimalsPart = value?.toString()?.split(".")?.[1] || "";
+  const eDecimals = Number(decimalsPart?.split("e-")?.[1]) || 0;
+  const countOfDecimals = decimalsPart.length + eDecimals;
+  return Number(value).toFixed(countOfDecimals);
+};
+
 export const getBetKelly =
   (log = false) =>
   (lineUp: LineUp, currentMoney: number) => {
@@ -272,15 +289,16 @@ export const getBetKelly =
       (decimalOdds * actualProbability - 1) / (decimalOdds - 1);
 
     const chances = calculateChances(lineUp);
-    const kellyCriterions = chances.map((chance, i) =>
-      kellyCriterion(
+    const kellyCriterions = chances.map((chance, i) => {
+      // if (chance === 0) return -Infinity;
+      return kellyCriterion(
         convertFractionOddsToDecimal(
           lineUp[i].oddsNumerator,
           lineUp[i].oddsDenominator
         ),
         chance
-      )
-    );
+      );
+    });
 
     const maxKellyCriterion = Math.max(...kellyCriterions);
     const maxKellyCriterionIndex = kellyCriterions.indexOf(maxKellyCriterion);
@@ -289,9 +307,15 @@ export const getBetKelly =
 
     log &&
       console.log(
-        `${maxKellyCriterion},${adjustedChance},${convertFractionOddsToPercentage(
-          horse.oddsNumerator,
-          horse.oddsDenominator
+        `${convertScientificNotationNumber(
+          maxKellyCriterion
+        )},${convertScientificNotationNumber(
+          adjustedChance
+        )},${convertScientificNotationNumber(
+          convertFractionOddsToPercentage(
+            horse.oddsNumerator,
+            horse.oddsDenominator
+          )
         )}`
       );
 

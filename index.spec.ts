@@ -17,7 +17,7 @@ it("works", async () => {
   await main(getXthFavourite(0, false), false);
 
   // await main(getBetKelly(true), false);
-  await main(getBetKelly(false), true);
+  // await main(getBetKelly(false), true);
   // await main(getXthFavourite(0), true);
   // await main(getXthFavourite(0, true), false);
   // await main(getXthFavourite(0, false), true);
@@ -180,6 +180,20 @@ describe("adjust odds to first horse", () => {
       [
         0.02,
         0.98,
+      ]
+    `);
+  });
+  it("works for very different", () => {
+    const chances = [12.5, 6.25, 50, 50, 4.166666667, 4.761904762];
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0,
+        0,
+        0.41071428570999996,
+        0.5,
+        0.041666666670000005,
+        0.04761904762,
       ]
     `);
   });
