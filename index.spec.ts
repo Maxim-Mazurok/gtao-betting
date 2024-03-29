@@ -1,14 +1,17 @@
 import { expect, it, describe } from "vitest";
 import {
   Horse,
+  adjustChancesEqually,
   calculateNetWinnings,
   convertFractionOddsToDecimal,
   convertFractionOddsToPercentage,
+  getBetKelly,
   getXthFavourite,
   main,
 } from ".";
 
 it("works", async () => {
+  await main(getBetKelly, false);
   await main(getXthFavourite(0), true);
 });
 
@@ -84,5 +87,38 @@ describe("calculates winnings", () => {
         winner
       )
     ).toBe(-100);
+  });
+});
+
+describe("adjust odds equally", () => {
+  it("works for smaller", () => {
+    const chances = [30, 30];
+    const adjusted = adjustChancesEqually(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.5,
+        0.5,
+      ]
+    `);
+  });
+  it("works for higher", () => {
+    const chances = [130, 130];
+    const adjusted = adjustChancesEqually(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.5,
+        0.5,
+      ]
+    `);
+  });
+  it("works for very different", () => {
+    const chances = [1, 98];
+    const adjusted = adjustChancesEqually(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.015,
+        0.985,
+      ]
+    `);
   });
 });

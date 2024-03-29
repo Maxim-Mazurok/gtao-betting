@@ -66,13 +66,26 @@ const generateLineUp = (): LineUp => {
   return lineUp;
 };
 
+export const adjustChancesEqually = (chances: number[]) => {
+  const totalOddsChance = chances.reduce((a, b) => a + b, 0);
+  const diff = 100 - totalOddsChance;
+  return chances
+    .map((chance) => chance + diff / chances.length)
+    .map((x) => x / 100);
+};
+
+const adjustChancesProportionally = (chances: number[]) => {
+  const totalOddsChance = chances.reduce((a, b) => a + b, 0);
+  return chances.map((chance) => chance / totalOddsChance);
+};
+
 const calculateChances = (lineUp: LineUp): number[] => {
   const decimalOdds = lineUp.map((horse) =>
     convertFractionOddsToDecimal(horse.oddsNumerator, horse.oddsDenominator)
   );
   const oddsChances = decimalOdds.map((odds) => 100 / odds);
-  const totalOddsChance = oddsChances.reduce((a, b) => a + b, 0);
-  const adjustedChances = oddsChances.map((chance) => chance / totalOddsChance);
+  const adjustedChances = adjustChancesProportionally(oddsChances);
+  // const adjustedChances = adjustChancesEqually(oddsChances);
 
   return adjustedChances;
 };
@@ -212,7 +225,7 @@ const getHistoricalData = async (): Promise<
   }));
 };
 
-const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
+export const getBetKelly = (lineUp: LineUp, currentMoney: number) => {
   const kellyCriterion = (decimalOdds: number, actualProbability: number) =>
     (decimalOdds * actualProbability - 1) / (decimalOdds - 1);
 

@@ -36,3 +36,11 @@ See also my personal spreadsheet: https://docs.google.com/spreadsheets/d/1z27GEy
 - https://docs.google.com/spreadsheets/d/1_SNaIFYstqPOcoGnXIHDIxm1xu_I98QDepUyHZwDgBY/edit - wrong "Adjusted advantage" calculation, can be negative in edge cases
 - https://docs.google.com/spreadsheets/d/1P0aQr-S4cshuxagh8JJ0TK6kU9GjDTGIRBuxM7D42vs/edit - more correct, but complicated "Final Adjusted Odds %" calculations, in my spreadsheet I just use one simple formula for proportional adjustment, seems to produce very similar results to this one
 - https://gta.fandom.com/wiki/Inside_Track - sourced horses list from here
+
+## Notes
+
+- Seems like the game doesn't actually use suggested chances adjustments. For example, for 371 games, the average adjusted odds for evens were 48% but the actual win rate of evens was 65%, see [Podium Frequency Chart - 2](https://docs.google.com/spreadsheets/d/1z27GEyrFVnBBZcCJ-w2QDZS9LKDiZfK2wvD02UxifzE/edit#gid=384889435)
+
+## ToDo
+
+- [ ] Try calculating average adjusted odds for each horse based on all possible combinations in the game? Doesn't make much sense tho because the adjustment doesn't seem to be used by the game
