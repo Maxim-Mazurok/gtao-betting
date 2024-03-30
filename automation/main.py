@@ -364,6 +364,23 @@ def select_horse():
     elif lowest_numerator == horse_6:
         click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
 
+    # third_lowest_numerator = horses[2]
+    # # print(f"Selected horse: {lowest_numerator}")
+
+    # # click on the horse
+    # if third_lowest_numerator == horse_1:
+    #     click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
+    # elif third_lowest_numerator == horse_2:
+    #     click_in_the_middle_of_crop(SELECT_HORSE_2_CROP)
+    # elif third_lowest_numerator == horse_3:
+    #     click_in_the_middle_of_crop(SELECT_HORSE_3_CROP)
+    # elif third_lowest_numerator == horse_4:
+    #     click_in_the_middle_of_crop(SELECT_HORSE_4_CROP)
+    # elif third_lowest_numerator == horse_5:
+    #     click_in_the_middle_of_crop(SELECT_HORSE_5_CROP)
+    # elif third_lowest_numerator == horse_6:
+    #     click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
+
     # save screenshot
     # capture_game_screen().save('screenshot.png')
 

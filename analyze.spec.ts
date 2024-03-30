@@ -51,7 +51,15 @@ it("works", async () => {
     const chances = calculateChances(lineUp);
 
     for (let i = 0; i < lineUp.length; i++) {
-      expectedWins[i + 1] += chances[i];
+      // expectedWins[i + 1] += chances[i];
+      expectedWins[i + 1] +=
+        100 /
+        convertFractionOddsToDecimal(
+          lineUp[i].oddsNumerator,
+          lineUp[i].oddsDenominator
+        ) /
+        100;
+
       // expectedWinsGroup[lineUp[i].group] += chances[i];
       expectedWinsGroup[lineUp[i].group] +=
         100 /
