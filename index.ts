@@ -22,10 +22,10 @@ export const convertFractionOddsToPercentage = (
   return oddsDenominator / (oddsNumerator + oddsDenominator);
 };
 
-type LineUp = Horse[];
+export type LineUp = Horse[];
 
 const horsesTxt = readFileSync("./horses.txt", "utf-8");
-const horses: Horse[] = horsesTxt.split("\n").map((horse) => {
+const parseHorse = (horse: string): Horse => {
   const name = horse.split(",")[0].trim();
   const originalOdds = horse.split(",")[1].trim();
   const fractionOdds = originalOdds === "EVENS" ? "1/1" : originalOdds;
@@ -45,7 +45,8 @@ const horses: Horse[] = horsesTxt.split("\n").map((horse) => {
     oddsDenominator,
     group,
   };
-});
+};
+const horses: Horse[] = horsesTxt.split("\n").map(parseHorse);
 
 // console.log(horses);
 
@@ -126,7 +127,7 @@ const adjustChancesProportionally = (chances: number[]) => {
   return chances.map((chance) => chance / totalOddsChance);
 };
 
-const calculateChances = (lineUp: LineUp): number[] => {
+export const calculateChances = (lineUp: LineUp): number[] => {
   const decimalOdds = lineUp.map((horse) =>
     convertFractionOddsToDecimal(horse.oddsNumerator, horse.oddsDenominator)
   );
@@ -199,7 +200,7 @@ const playGame = (
   return calculateNetWinnings(bet, winner);
 };
 
-const getHistoricalData = async (): Promise<
+export const getHistoricalData = async (): Promise<
   {
     lineUp: LineUp;
     winner: Horse;
