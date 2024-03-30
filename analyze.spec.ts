@@ -26,6 +26,16 @@ it("works", async () => {
     5: 0,
     6: 0,
   };
+  const winnerGroup = {
+    favourites: 0,
+    outsiders: 0,
+    underdogs: 0,
+  };
+  const expectedWinsGroup = {
+    favourites: 0,
+    outsiders: 0,
+    underdogs: 0,
+  };
   const historicalData = await getHistoricalData();
   for (let i = 0; i < historicalData.length; i++) {
     const lineUp = historicalData[i].lineUp.sort(
@@ -36,14 +46,26 @@ it("works", async () => {
       (horse) => horse === historicalData[i].winner
     );
     winners[winnerIndex + 1]++;
+    winnerGroup[historicalData[i].winner.group]++;
 
     const chances = calculateChances(lineUp);
 
     for (let i = 0; i < lineUp.length; i++) {
       expectedWins[i + 1] += chances[i];
+      // expectedWinsGroup[lineUp[i].group] += chances[i];
+      expectedWinsGroup[lineUp[i].group] +=
+        100 /
+        convertFractionOddsToDecimal(
+          lineUp[i].oddsNumerator,
+          lineUp[i].oddsDenominator
+        ) /
+        100;
     }
   }
 
   console.log(winners);
   console.log(expectedWins);
+
+  console.table(winnerGroup);
+  console.table(expectedWinsGroup);
 });
