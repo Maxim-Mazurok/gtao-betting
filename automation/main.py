@@ -347,39 +347,40 @@ def select_horse():
     # sort by numerator converted to number
     horses.sort(key=lambda x: int(x[1].split(',')[1].split(
         '/')[0]) if x[1].split(',')[1].strip() != 'EVENS' else 1)
-    lowest_numerator = horses[0]
-    # print(f"Selected horse: {lowest_numerator}")
 
-    # click on the horse
-    if lowest_numerator == horse_1:
-        click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
-    elif lowest_numerator == horse_2:
-        click_in_the_middle_of_crop(SELECT_HORSE_2_CROP)
-    elif lowest_numerator == horse_3:
-        click_in_the_middle_of_crop(SELECT_HORSE_3_CROP)
-    elif lowest_numerator == horse_4:
-        click_in_the_middle_of_crop(SELECT_HORSE_4_CROP)
-    elif lowest_numerator == horse_5:
-        click_in_the_middle_of_crop(SELECT_HORSE_5_CROP)
-    elif lowest_numerator == horse_6:
-        click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
-
-    # third_lowest_numerator = horses[2]
+    # lowest_numerator = horses[0]
     # # print(f"Selected horse: {lowest_numerator}")
 
     # # click on the horse
-    # if third_lowest_numerator == horse_1:
+    # if lowest_numerator == horse_1:
     #     click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
-    # elif third_lowest_numerator == horse_2:
+    # elif lowest_numerator == horse_2:
     #     click_in_the_middle_of_crop(SELECT_HORSE_2_CROP)
-    # elif third_lowest_numerator == horse_3:
+    # elif lowest_numerator == horse_3:
     #     click_in_the_middle_of_crop(SELECT_HORSE_3_CROP)
-    # elif third_lowest_numerator == horse_4:
+    # elif lowest_numerator == horse_4:
     #     click_in_the_middle_of_crop(SELECT_HORSE_4_CROP)
-    # elif third_lowest_numerator == horse_5:
+    # elif lowest_numerator == horse_5:
     #     click_in_the_middle_of_crop(SELECT_HORSE_5_CROP)
-    # elif third_lowest_numerator == horse_6:
+    # elif lowest_numerator == horse_6:
     #     click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
+
+    third_lowest_numerator = horses[2]
+    # print(f"Selected horse: {lowest_numerator}")
+
+    # click on the horse
+    if third_lowest_numerator == horse_1:
+        click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
+    elif third_lowest_numerator == horse_2:
+        click_in_the_middle_of_crop(SELECT_HORSE_2_CROP)
+    elif third_lowest_numerator == horse_3:
+        click_in_the_middle_of_crop(SELECT_HORSE_3_CROP)
+    elif third_lowest_numerator == horse_4:
+        click_in_the_middle_of_crop(SELECT_HORSE_4_CROP)
+    elif third_lowest_numerator == horse_5:
+        click_in_the_middle_of_crop(SELECT_HORSE_5_CROP)
+    elif third_lowest_numerator == horse_6:
+        click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
 
     # save screenshot
     # capture_game_screen().save('screenshot.png')
