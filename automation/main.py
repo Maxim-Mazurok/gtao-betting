@@ -297,7 +297,7 @@ def record_results():
     third_place = detect_horse(get_text_from_crop(THIRD_PLACE_CROP))
     result = f"{first_place[0]},\"{first_place[1]}\",{second_place[0]},\"{second_place[1]}\",{third_place[0]},\"{third_place[1]}\""
     print(result)
-    with open('results_log.csv', 'a') as file:
+    with open('bet_on_3rd_fav_results_log.csv', 'a') as file:
         file.write(result + '\n')
 
 
@@ -338,7 +338,7 @@ def select_horse():
     #     f"Detected horses:\n{horse_1}\n{horse_2}\n{horse_3}\n{horse_4}\n{horse_5}\n{horse_6}\n")
     line_up = f"{horse_1[0]},\"{horse_1[1]}\",{horse_2[0]},\"{horse_2[1]}\",{horse_3[0]},\"{horse_3[1]}\",{horse_4[0]},\"{horse_4[1]}\",{horse_5[0]},\"{horse_5[1]}\",{horse_6[0]},\"{horse_6[1]}\""
     print(line_up)
-    with open('line_up_log.csv', 'a') as file:
+    with open('bet_on_3rd_fav_line_up_log.csv', 'a') as file:
         file.write(line_up + '\n')
 
     # each horse is like this: (98, 'Yellow Sunshine, 5/1')
