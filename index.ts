@@ -206,7 +206,7 @@ export const getHistoricalData = async (): Promise<
     winner: Horse;
   }[]
 > => {
-  const lineUpsFile = await readFile("./automation/line_up_log.csv", "utf-8");
+  const lineUpsFile = await readFile("./automation/bet_on_3rd_fav_line_up_log.csv", "utf-8");
   const lineUps: LineUp[] = lineUpsFile
     .split("\n")
     .filter(Boolean)
@@ -240,7 +240,7 @@ export const getHistoricalData = async (): Promise<
       return [horse1, horse2, horse3, horse4, horse5, horse6];
     });
 
-  const resultsFile = await readFile("./automation/results_log.csv", "utf-8");
+  const resultsFile = await readFile("./automation/bet_on_3rd_fav_results_log.csv", "utf-8");
   const results: [Horse, Horse, Horse][] = resultsFile
     .split("\n")
     .filter(Boolean)

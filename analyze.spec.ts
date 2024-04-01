@@ -18,7 +18,15 @@ it("works", async () => {
     5: 0,
     6: 0,
   };
-  const expectedWins = {
+  const expectedWinsOdds = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+  };
+  const expectedWinsAdj = {
     1: 0,
     2: 0,
     3: 0,
@@ -31,7 +39,12 @@ it("works", async () => {
     outsiders: 0,
     underdogs: 0,
   };
-  const expectedWinsGroup = {
+  const expectedWinsGroupOdds = {
+    favourites: 0,
+    outsiders: 0,
+    underdogs: 0,
+  };
+  const expectedWinsGroupAdj = {
     favourites: 0,
     outsiders: 0,
     underdogs: 0,
@@ -51,8 +64,8 @@ it("works", async () => {
     const chances = calculateChances(lineUp);
 
     for (let i = 0; i < lineUp.length; i++) {
-      // expectedWins[i + 1] += chances[i];
-      expectedWins[i + 1] +=
+      expectedWinsAdj[i + 1] += chances[i];
+      expectedWinsOdds[i + 1] +=
         100 /
         convertFractionOddsToDecimal(
           lineUp[i].oddsNumerator,
@@ -60,8 +73,8 @@ it("works", async () => {
         ) /
         100;
 
-      // expectedWinsGroup[lineUp[i].group] += chances[i];
-      expectedWinsGroup[lineUp[i].group] +=
+      expectedWinsGroupAdj[lineUp[i].group] += chances[i];
+      expectedWinsGroupOdds[lineUp[i].group] +=
         100 /
         convertFractionOddsToDecimal(
           lineUp[i].oddsNumerator,
@@ -71,9 +84,17 @@ it("works", async () => {
     }
   }
 
-  console.log(winners);
-  console.log(expectedWins);
+  console.log("\nactual wins by Nth fav:");
+  console.log(Object.values(winners).join("\n"));
+  console.log("\nexp wins by odds:");
+  console.log(Object.values(expectedWinsOdds).join("\n"));
+  console.log("\nexp wins adj:");
+  console.log(Object.values(expectedWinsAdj).join("\n"));
 
-  console.table(winnerGroup);
-  console.table(expectedWinsGroup);
+  console.log("\nactual wins:");
+  console.log(Object.values(winnerGroup).join("\n"));
+  console.log("\nexp wins by odds:");
+  console.log(Object.values(expectedWinsGroupOdds).join("\n"));
+  console.log("\nexp wins adj:");
+  console.log(Object.values(expectedWinsGroupOdds).join("\n"));
 });
