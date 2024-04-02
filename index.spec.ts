@@ -16,8 +16,8 @@ it("works", async () => {
   await main(getBetKelly(false), false);
   await main(getXthFavourite(0, false), false);
 
-  // await main(getBetKelly(true), false);
   // await main(getBetKelly(false), true);
+  // await main(getBetKelly(true), false);
   // await main(getXthFavourite(0), true);
   // await main(getXthFavourite(0, true), false);
   // await main(getXthFavourite(0, false), true);

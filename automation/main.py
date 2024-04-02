@@ -413,6 +413,7 @@ def select_bet_amount():
         # for _ in range(27):
         #     click_in_the_middle_of_crop(SET_BET_AMOUNT_RIGHT_CROP)
         pydirectinput.press('tab')  # max bet
+        time.sleep(0.1)
 
 
 # seems like 1h per day is the limit for GTAO before you get banned from betting for about 1-1.5 weeks
