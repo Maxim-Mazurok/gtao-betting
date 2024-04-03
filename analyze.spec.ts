@@ -96,5 +96,5 @@ it("works", async () => {
   console.log("\nexp wins by odds:");
   console.log(Object.values(expectedWinsGroupOdds).join("\n"));
   console.log("\nexp wins adj:");
-  console.log(Object.values(expectedWinsGroupOdds).join("\n"));
+  console.log(Object.values(expectedWinsGroupAdj).join("\n"));
 });
