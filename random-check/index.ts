@@ -5,41 +5,72 @@ import { rando } from "@nastyox/rando.js";
 
 Chart.register(annotationPlugin);
 
+const colors = [
+  "#000000",
+  "#6A5ACD",
+  "#FF0000",
+  "#00FF00",
+  "#0000FF",
+  "#FFFF00",
+  "#00FFFF",
+  "#FF00FF",
+  "#C0C0C0",
+  "#808080",
+  "#800000",
+  "#808000",
+  "#008000",
+  "#800080",
+  "#008080",
+  "#000080",
+  "#FFA500",
+  "#FFD700",
+  "#FFC0CB",
+  "#A52A2A",
+  "#FF7F50",
+  "#8A2BE2",
+  "#F5DEB3",
+  "#32CD32",
+  "#87CEEB",
+  "#D2691E",
+  "#FF6347",
+  "#40E0D0",
+  "#FF8C00",
+  "#DDA0DD",
+];
+
 const data1: ChartData = {
   labels: [] as number[],
-  datasets: [
-    {
-      label: "Red",
-      data: [] as number[],
-      borderColor: "red",
-      backgroundColor: "red",
-    },
-    {
-      label: "Black",
-      data: [] as number[],
-      borderColor: "black",
-      backgroundColor: "black",
-    },
-    {
-      label: "Expected Red",
-      data: [] as number[],
-      borderColor: "blue",
-      backgroundColor: "blue",
-    },
-  ],
+  datasets: [],
 };
 
 const data2: ChartData = {
   labels: [] as number[],
   datasets: [
     {
-      label: "Chi Square",
+      label: "Total Chi Square",
       data: [] as number[],
       borderColor: "red",
       backgroundColor: "red",
+      weight: 3,
     },
   ],
 };
+
+for (let i = 0; i <= 29; i++) {
+  data1.datasets.push({
+    label: `#${i}`,
+    data: [] as number[],
+    borderColor: colors[i],
+    backgroundColor: colors[i],
+  });
+  data2.datasets.push({
+    label: `#${i}`,
+    data: [] as number[],
+    borderColor: colors[i],
+    backgroundColor: colors[i],
+  });
+}
+
 const data3: ChartData = {
   labels: [] as number[],
   datasets: [
@@ -142,36 +173,69 @@ const chart3 = new Chart(ctx3, {
 let iterations = 10000;
 
 let games = 0;
-let redWins = 0;
-let blackWins = 0;
-let expectedRed = 0;
+let wins = Array.from({ length: 30 }, () => 0);
+let expectedWins = Array.from({ length: 30 }, () => 0);
 
-const iterate = () => {
-  const batchSize = 10;
-  for (let i = 0; i < batchSize; i++) {
-    // const color = Math.random() > 0.4 ? "Red" : "Black";
-    const color = rando(1, 10) > 4 ? "Red" : "Black";
-    games++;
-    if (color === "Red") {
-      redWins++;
-    } else {
-      blackWins++;
-    }
-    expectedRed += 0.5;
+const totalChances = (() => {
+  let total = 0;
+  for (let i = 1; i <= 30; i++) {
+    total += 1 / (i + 1);
+  }
+  return total;
+})();
+
+const getWinnerId = () => {
+  const houseWins = rando(0, 500) === 0;
+  if (houseWins) {
+    return 29;
   }
 
-  data1.datasets[0].data.push(redWins / games);
-  data1.datasets[1].data.push(blackWins / games);
-  data1.datasets[2].data.push(expectedRed / games);
+  const _random = rando(0, totalChances, "float");
+  let random = _random;
+  for (let i = 1; i <= 30; i++) {
+    random -= 1 / (i + 1);
+    if (random < 0) {
+      // console.log({ _random, totalChances, i });
+      return i;
+    }
+  }
+  // console.log({random, totalChances, 29})
+  return 29;
+};
+
+const iterate = () => {
+  const batchSize = 100;
+  for (let i = 0; i < batchSize; i++) {
+    // const color = Math.random() > 0.4 ? "Red" : "Black";
+    const horseId = getWinnerId();
+
+    games++;
+    wins[horseId - 1]++;
+
+    for (let i = 1; i <= 30; i++) {
+      const chance = 1 / (i + 1);
+      const adjustedChance = chance / totalChances;
+      expectedWins[i - 1] += adjustedChance;
+    }
+  }
+
+  for (let i = 0; i < 30; i++) {
+    data1.datasets[i].data.push(wins[i] / games);
+  }
 
   data1.labels?.push(games);
   data2.labels?.push(games);
   data3.labels?.push(games);
 
-  const chiSquare = Math.pow(redWins - expectedRed, 2) / expectedRed;
-  data2.datasets[0].data.push(chiSquare);
+  let totalChiSquare = 0;
+  for (let i = 0; i < 30; i++) {
+    const chiSquare = Math.pow(wins[i] - expectedWins[i], 2) / expectedWins[i];
+    chart2.data.datasets[i + 1].data.push(chiSquare);
+    totalChiSquare += chiSquare;
+  }
+  data2.datasets[0].data.push(totalChiSquare);
 
-  const significanceLevel = chiSquareRightTailArea(chiSquare, 1);
+  const significanceLevel = chiSquareRightTailArea(totalChiSquare, 29);
   data3.datasets[0].data.push(significanceLevel);
 
   chart1.update("none");
