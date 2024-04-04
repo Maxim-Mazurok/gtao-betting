@@ -445,7 +445,7 @@ def main():
                 select_horse()
                 balance_string = f"{get_balance()},\"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\""
                 print(balance_string)
-                with open('log.csv', 'a') as file:
+                with open('bet_on_1st_fav_log.csv', 'a') as file:
                     file.write(balance_string + '\n')
                 select_bet_amount()
 
