@@ -9,8 +9,8 @@ import pyautogui
 import Levenshtein as lev
 import keyboard
 
-BET_ON = "1st"
-# BET_ON = "3rd"
+# BET_ON = "1st"
+BET_ON = "3rd"
 
 PAUSED = False
 
