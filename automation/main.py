@@ -9,6 +9,9 @@ import pyautogui
 import Levenshtein as lev
 import keyboard
 
+BET_ON = "1st"
+# BET_ON = "3rd"
+
 PAUSED = False
 
 GAME_TITLE = 'Grand Theft Auto V'
@@ -297,7 +300,7 @@ def record_results():
     third_place = detect_horse(get_text_from_crop(THIRD_PLACE_CROP))
     result = f"{first_place[0]},\"{first_place[1]}\",{second_place[0]},\"{second_place[1]}\",{third_place[0]},\"{third_place[1]}\""
     print(result)
-    with open('bet_on_1st_fav_results_log.csv', 'a') as file:
+    with open(f'bet_on_{BET_ON}_fav_results_log.csv', 'a') as file:
         file.write(result + '\n')
 
 
@@ -338,7 +341,7 @@ def select_horse():
     #     f"Detected horses:\n{horse_1}\n{horse_2}\n{horse_3}\n{horse_4}\n{horse_5}\n{horse_6}\n")
     line_up = f"{horse_1[0]},\"{horse_1[1]}\",{horse_2[0]},\"{horse_2[1]}\",{horse_3[0]},\"{horse_3[1]}\",{horse_4[0]},\"{horse_4[1]}\",{horse_5[0]},\"{horse_5[1]}\",{horse_6[0]},\"{horse_6[1]}\""
     print(line_up)
-    with open('bet_on_1st_fav_line_up_log.csv', 'a') as file:
+    with open(f'bet_on_{BET_ON}_fav_line_up_log.csv', 'a') as file:
         file.write(line_up + '\n')
 
     # each horse is like this: (98, 'Yellow Sunshine, 5/1')
@@ -348,39 +351,25 @@ def select_horse():
     horses.sort(key=lambda x: int(x[1].split(',')[1].split(
         '/')[0]) if x[1].split(',')[1].strip() != 'EVENS' else 1)
 
-    lowest_numerator = horses[0]
+    if BET_ON == "1st":
+        selected_numerator = horses[0]
+    elif BET_ON == "3rd":
+        selected_numerator = horses[2]
     # print(f"Selected horse: {lowest_numerator}")
 
     # click on the horse
-    if lowest_numerator == horse_1:
+    if selected_numerator == horse_1:
         click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
-    elif lowest_numerator == horse_2:
+    elif selected_numerator == horse_2:
         click_in_the_middle_of_crop(SELECT_HORSE_2_CROP)
-    elif lowest_numerator == horse_3:
+    elif selected_numerator == horse_3:
         click_in_the_middle_of_crop(SELECT_HORSE_3_CROP)
-    elif lowest_numerator == horse_4:
+    elif selected_numerator == horse_4:
         click_in_the_middle_of_crop(SELECT_HORSE_4_CROP)
-    elif lowest_numerator == horse_5:
+    elif selected_numerator == horse_5:
         click_in_the_middle_of_crop(SELECT_HORSE_5_CROP)
-    elif lowest_numerator == horse_6:
+    elif selected_numerator == horse_6:
         click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
-
-    # third_lowest_numerator = horses[2]
-    # # print(f"Selected horse: {lowest_numerator}")
-
-    # # click on the horse
-    # if third_lowest_numerator == horse_1:
-    #     click_in_the_middle_of_crop(SELECT_HORSE_1_CROP)
-    # elif third_lowest_numerator == horse_2:
-    #     click_in_the_middle_of_crop(SELECT_HORSE_2_CROP)
-    # elif third_lowest_numerator == horse_3:
-    #     click_in_the_middle_of_crop(SELECT_HORSE_3_CROP)
-    # elif third_lowest_numerator == horse_4:
-    #     click_in_the_middle_of_crop(SELECT_HORSE_4_CROP)
-    # elif third_lowest_numerator == horse_5:
-    #     click_in_the_middle_of_crop(SELECT_HORSE_5_CROP)
-    # elif third_lowest_numerator == horse_6:
-    #     click_in_the_middle_of_crop(SELECT_HORSE_6_CROP)
 
     # save screenshot
     # capture_game_screen().save('screenshot.png')
@@ -445,7 +434,7 @@ def main():
                 select_horse()
                 balance_string = f"{get_balance()},\"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\""
                 print(balance_string)
-                with open('bet_on_1st_fav_log.csv', 'a') as file:
+                with open(f'bet_on_{BET_ON}_fav_log.csv', 'a') as file:
                     file.write(balance_string + '\n')
                 select_bet_amount()
 
