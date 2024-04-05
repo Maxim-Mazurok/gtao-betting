@@ -200,13 +200,18 @@ const playGame = (
   return calculateNetWinnings(bet, winner);
 };
 
-export const getHistoricalData = async (): Promise<
+export const getHistoricalData = async (
+  type: "1st" | "3rd" = "1st"
+): Promise<
   {
     lineUp: LineUp;
     winner: Horse;
   }[]
 > => {
-  const lineUpsFile = await readFile("./automation/bet_on_3rd_fav_line_up_log.csv", "utf-8");
+  const lineUpsFile = await readFile(
+    `./automation/bet_on_${type}_fav_line_up_log.csv`,
+    "utf-8"
+  );
   const lineUps: LineUp[] = lineUpsFile
     .split("\n")
     .filter(Boolean)
@@ -240,7 +245,10 @@ export const getHistoricalData = async (): Promise<
       return [horse1, horse2, horse3, horse4, horse5, horse6];
     });
 
-  const resultsFile = await readFile("./automation/bet_on_3rd_fav_results_log.csv", "utf-8");
+  const resultsFile = await readFile(
+    `./automation/bet_on_${type}_fav_results_log.csv`,
+    "utf-8"
+  );
   const results: [Horse, Horse, Horse][] = resultsFile
     .split("\n")
     .filter(Boolean)
@@ -263,16 +271,18 @@ export const getHistoricalData = async (): Promise<
     });
   const winners = results.map((result) => result[0]);
 
-  // verify that winner is in the lineUp
+  // verify that podium is in the lineUp
   for (let i = 0; i < lineUps.length; i++) {
-    if (!lineUps[i].includes(winners[i])) {
-      throw new Error(`winner not in lineUp ${i}`);
+    for (let j = 0; j < 3; j++) {
+      if (!lineUps[i].includes(results[i][j])) {
+        throw new Error(`result #${j} not in lineUp ${i}`);
+      }
     }
   }
 
   return lineUps.map((lineUp, i) => ({
     lineUp,
-    winner: winners[i],
+    winner: results[i][0],
   }));
 };
 
