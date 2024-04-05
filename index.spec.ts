@@ -1,16 +1,18 @@
-import { expect, it, describe } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   Horse,
-  adjustChancesEqually,
-  adjustChancesToFirstHorse,
-  adjustGoodChancesToFirstHorseAndBadChancesToLast,
   calculateNetWinnings,
-  convertFractionOddsToDecimal,
   convertFractionOddsToPercentage,
   getBetKelly,
   getXthFavourite,
   main,
 } from ".";
+import {
+  adjustChancesEqually,
+  adjustChancesToFirstHorse,
+  adjustGoodChancesToFirstHorseAndBadChancesToLast,
+  convertFractionOddsToDecimal,
+} from "./utils";
 
 it("works", async () => {
   await main(getBetKelly(false), false);
@@ -19,7 +21,8 @@ it("works", async () => {
   // await main(getBetKelly(false), true);
   // await main(getBetKelly(true), false);
   // await main(getXthFavourite(0), true);
-  // await main(getXthFavourite(0, true), false);
+  // await main(getXthFavourite(0, true, "proportionate"), false);
+  // await main(getXthFavourite(0, true, "first-horse"), false);
   // await main(getXthFavourite(0, false), true);
 });
 
@@ -194,6 +197,62 @@ describe("adjust odds to first horse", () => {
         0.5,
         0.041666666670000005,
         0.04761904762,
+      ]
+    `);
+  });
+  it("works for another different", () => {
+    const horses = [
+      {
+        name: "Yay Yo Let's Go",
+        oddsNumerator: 3,
+        oddsDenominator: 1,
+        group: "favourites",
+      },
+      {
+        name: "Flipped Wig",
+        oddsNumerator: 12,
+        oddsDenominator: 1,
+        group: "outsiders",
+      },
+      {
+        name: "Stupid Money",
+        oddsNumerator: 30,
+        oddsDenominator: 1,
+        group: "underdogs",
+      },
+      {
+        name: "Tenpenny",
+        oddsNumerator: 10,
+        oddsDenominator: 1,
+        group: "outsiders",
+      },
+      {
+        name: "Yellow Sunshine",
+        oddsNumerator: 5,
+        oddsDenominator: 1,
+        group: "favourites",
+      },
+      {
+        name: "Dead Fam",
+        oddsNumerator: 26,
+        oddsDenominator: 1,
+        group: "underdogs",
+      },
+    ];
+    const chances = horses.map(
+      (horse) =>
+        100 /
+        convertFractionOddsToDecimal(horse.oddsNumerator, horse.oddsDenominator)
+    );
+    const adjusted = adjustChancesToFirstHorse(chances);
+    expect(adjusted).toMatchInlineSnapshot(`
+      [
+        0.5962060639479994,
+        0.07692307692307693,
+        0.03225806451612903,
+        0.09090909090909091,
+        0.16666666666666669,
+        0.037037037037037035,
       ]
     `);
   });

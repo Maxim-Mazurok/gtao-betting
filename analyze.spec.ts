@@ -1,11 +1,10 @@
 import { it } from "vitest";
-import {
-  calculateChances,
-  convertFractionOddsToDecimal,
-  getHistoricalData,
-} from ".";
+import { getHistoricalData } from "./fs-utils";
+import { calculateChances, convertFractionOddsToDecimal } from "./utils";
 
-["1st", "3rd"].map((type) =>
+const types = ["1st", "3rd"] as const;
+
+types.map((type) =>
   it(`works for ${type}`, async () => {
     const winners = {
       1: 0,
@@ -23,7 +22,15 @@ import {
       5: 0,
       6: 0,
     };
-    const expectedWinsAdj = {
+    const expectedWinsAdjProp = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+    };
+    const expectedWinsAdjFirstHorse = {
       1: 0,
       2: 0,
       3: 0,
@@ -41,27 +48,35 @@ import {
       outsiders: 0,
       underdogs: 0,
     };
-    const expectedWinsGroupAdj = {
+    const expectedWinsGroupAdjProp = {
       favourites: 0,
       outsiders: 0,
       underdogs: 0,
     };
-    const historicalData = await getHistoricalData();
+    const expectedWinsGroupAdjFirstHorse = {
+      favourites: 0,
+      outsiders: 0,
+      underdogs: 0,
+    };
+    const historicalData = await getHistoricalData(type);
     for (let i = 0; i < historicalData.length; i++) {
-      const lineUp = historicalData[i].lineUp.sort(
+      const lineUp = historicalData[i].lineUp;
+      const lineUpSorted = [...lineUp].sort(
         (a, b) => a.oddsNumerator - b.oddsNumerator
       );
 
-      const winnerIndex = lineUp.findIndex(
+      const winnerIndex = lineUpSorted.findIndex(
         (horse) => horse === historicalData[i].winner
       );
       winners[winnerIndex + 1]++;
       winnerGroup[historicalData[i].winner.group]++;
 
-      const chances = calculateChances(lineUp);
+      const chancesProportionate = calculateChances(lineUp);
+      const chancesFirstHorse = calculateChances(lineUp, "first-horse");
 
       for (let i = 0; i < lineUp.length; i++) {
-        expectedWinsAdj[i + 1] += chances[i];
+        expectedWinsAdjProp[i + 1] += chancesProportionate[i];
+        expectedWinsAdjFirstHorse[i + 1] += chancesFirstHorse[i];
         expectedWinsOdds[i + 1] +=
           100 /
           convertFractionOddsToDecimal(
@@ -70,7 +85,8 @@ import {
           ) /
           100;
 
-        expectedWinsGroupAdj[lineUp[i].group] += chances[i];
+        expectedWinsGroupAdjProp[lineUp[i].group] += chancesProportionate[i];
+        expectedWinsGroupAdjFirstHorse[lineUp[i].group] += chancesFirstHorse[i];
         expectedWinsGroupOdds[lineUp[i].group] +=
           100 /
           convertFractionOddsToDecimal(
@@ -85,14 +101,18 @@ import {
     console.log(Object.values(winners).join("\n"));
     console.log("\nexp wins by odds:");
     console.log(Object.values(expectedWinsOdds).join("\n"));
-    console.log("\nexp wins adj:");
-    console.log(Object.values(expectedWinsAdj).join("\n"));
+    console.log("\nexp wins adj prop:");
+    console.log(Object.values(expectedWinsAdjProp).join("\n"));
+    console.log("\nexp wins adj first horse:");
+    console.log(Object.values(expectedWinsAdjFirstHorse).join("\n"));
 
     console.log("\nactual wins:");
     console.log(Object.values(winnerGroup).join("\n"));
     console.log("\nexp wins by odds:");
     console.log(Object.values(expectedWinsGroupOdds).join("\n"));
-    console.log("\nexp wins adj:");
-    console.log(Object.values(expectedWinsGroupAdj).join("\n"));
+    console.log("\nexp wins adj prop:");
+    console.log(Object.values(expectedWinsGroupAdjProp).join("\n"));
+    console.log("\nexp wins adj first horse:");
+    console.log(Object.values(expectedWinsGroupAdjFirstHorse).join("\n"));
   })
 );

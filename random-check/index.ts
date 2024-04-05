@@ -1,7 +1,7 @@
+import { rando } from "@nastyox/rando.js";
 import Chart, { ChartData } from "chart.js/auto";
 import annotationPlugin from "chartjs-plugin-annotation";
 import jStat from "jstat";
-import { rando } from "@nastyox/rando.js";
 
 Chart.register(annotationPlugin);
 
