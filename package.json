@@ -6,7 +6,7 @@
     "test": "vitest",
     "start": "tsx index.ts",
     "dev": "concurrently \"npm:server\" \"vite\"",
-    "server": "nodemon --watch random-check/**/*.ts --ext ts --ignore random-check/**/analyze.ts --exec tsx random-check/server.ts"
+    "server": "nodemon --exec tsx random-check/server.ts"
   },
   "author": "",
   "license": "ISC",

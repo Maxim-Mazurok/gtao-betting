@@ -1,5 +1,5 @@
 import express from "express";
-import { getHistoricalData } from "../fs-utils";
+import { getHistoricalData, getHorses } from "../fs-utils";
 
 const app = express();
 
@@ -11,6 +11,10 @@ app.get("/historical-data", async (req, res) => {
   if (!isValidType(type)) return res.status(400).send("Invalid type");
 
   return res.json(await getHistoricalData(type));
+});
+
+app.get("/horses", async (_, res) => {
+  return res.json(await getHorses());
 });
 
 app.listen(3000, () => console.log("Server is listening..."));

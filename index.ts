@@ -1,5 +1,10 @@
 import { getHistoricalData, getHorses } from "./fs-utils";
-import { calculateChances, convertFractionOddsToDecimal } from "./utils";
+import {
+  calculateChances,
+  convertFractionOddsToDecimal,
+  determineWinner,
+  generateLineUp,
+} from "./utils";
 
 export type Horse = {
   name: string;
@@ -16,41 +21,6 @@ export const convertFractionOddsToPercentage = (
 };
 
 export type LineUp = Horse[];
-
-// console.log(horses);
-
-const generateLineUp = (horses: Horse[]): LineUp => {
-  const lineUp: LineUp = [];
-  const horsesOptions = [...horses];
-  for (let group of ["favourites", "outsiders", "underdogs"]) {
-    for (let i = 0; i < 2; i++) {
-      const horsesInGroup = horsesOptions.filter(
-        (horse) => horse.group === group
-      );
-      const randomIndex = Math.floor(Math.random() * horsesInGroup.length);
-      const horse = horsesInGroup[randomIndex];
-      lineUp.push(horse);
-      horsesOptions.splice(horsesOptions.indexOf(horse), 1);
-    }
-  }
-  return lineUp;
-};
-
-// simulate the game and randomly pick a winner based on the odds
-const determineWinner = (lineUp: LineUp): Horse => {
-  const chances = calculateChances(lineUp);
-  const random = Math.random();
-  let sum = 0;
-
-  for (let i = 0; i < chances.length; i++) {
-    sum += chances[i];
-    if (random <= sum) {
-      // console.log(chances, random, i);
-      return lineUp[i];
-    }
-  }
-  return lineUp[chances.length - 1];
-};
 
 export const calculateNetWinnings = (
   bet: { horse: Horse; amount: number },

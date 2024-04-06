@@ -1,4 +1,4 @@
-import { LineUp } from ".";
+import { Horse, LineUp } from ".";
 
 // 1/1 => 0.5
 export const convertFractionOddsToChance = (
@@ -106,3 +106,41 @@ export const sortByOdds = (lineUp: LineUp) => {
     return oddsA - oddsB;
   });
 };
+
+// simulate the game and randomly pick a winner based on the odds
+export const determineWinner = (lineUp: LineUp): Horse => {
+  const chances = calculateChances(lineUp);
+  const random = Math.random();
+  let sum = 0;
+
+  for (let i = 0; i < chances.length; i++) {
+    sum += chances[i];
+    if (random <= sum) {
+      // console.log(chances, random, i);
+      return lineUp[i];
+    }
+  }
+  return lineUp[chances.length - 1];
+};
+
+export const generateLineUp = (horses: Horse[]): LineUp => {
+  const lineUp: LineUp = [];
+  const horsesOptions = [...horses];
+  for (let group of ["favourites", "outsiders", "underdogs"]) {
+    for (let i = 0; i < 2; i++) {
+      const horsesInGroup = horsesOptions.filter(
+        (horse) => horse.group === group
+      );
+      const randomIndex = randomIntFromInterval(0, horsesInGroup.length - 1);
+      const horse = horsesInGroup[randomIndex];
+      lineUp.push(horse);
+      horsesOptions.splice(horsesOptions.indexOf(horse), 1);
+    }
+  }
+  return lineUp;
+};
+
+function randomIntFromInterval(min: number, max: number) {
+  // min and max included
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
