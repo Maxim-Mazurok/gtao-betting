@@ -1,11 +1,11 @@
 import Chart from "chart.js/auto";
-import { getHistoricalData } from "../fs-utils";
+import { getHistoricalData } from "../../fs-utils";
 import {
   calculateChances,
   convertFractionOddsToChance,
   convertFractionOddsToDecimal,
   sortByOdds,
-} from "../utils";
+} from "../../utils";
 
 const doIt = async (
   chartCtx: HTMLCanvasElement,
