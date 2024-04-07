@@ -2,7 +2,7 @@ import Chart, { ChartData } from "chart.js/auto";
 import annotationPlugin from "chartjs-plugin-annotation";
 import jStat from "jstat";
 import { calculateChances, determineWinner, generateLineUp } from "../../utils";
-import { getHorses } from "../../fs-utils";
+import { getHistoricalData, getHorses } from "../../fs-utils";
 
 Chart.register(annotationPlugin);
 
@@ -69,6 +69,16 @@ for (let i = 0; i <= 29; i++) {
     data: [] as number[],
     borderColor: colors[i],
     backgroundColor: colors[i],
+  });
+}
+for (let i = 0; i <= 29; i++) {
+  data1.datasets.push({
+    label: `#${i} exp`,
+    data: [] as number[],
+    borderColor: colors[i],
+    backgroundColor: colors[i],
+    borderDash: [6, 6],
+    borderDashOffset: 0,
   });
 }
 
@@ -263,28 +273,30 @@ const chart4 = new Chart(ctx4, {
   },
 });
 
-let iterations = 1000;
+let iterations = 10000;
 
 let games = 0;
 let gamesPerHorse = Array.from({ length: 30 }, () => 0);
 let wins = Array.from({ length: 30 }, () => 0);
 let expectedWins = Array.from({ length: 30 }, () => 0);
 
+let lastChartsUpdate = Date.now();
+
 const iterate = () => {
-  const batchSize = 100000;
+  const batchSize = 1;
   for (let i = 0; i < batchSize; i++) {
-    const lineUp = generateLineUp(window["horses"]);
+    const gameData = (
+      window["historical"] as Awaited<ReturnType<typeof getHistoricalData>>
+    ).shift();
+    if (!gameData) return;
+    const { lineUp, winner } = gameData;
+
     const chances = calculateChances(lineUp, "proportionate");
     lineUp.forEach((horse, i) => {
       const id = horse.oddsNumerator - 1;
       expectedWins[id] += chances[i];
       gamesPerHorse[id]++;
     });
-    let winner = determineWinner(lineUp);
-    // if (Math.random() <= 1 / 500) {
-    //   // "house wins" 1 in 1000 games
-    //   winner = lineUp.sort((a, b) => a.oddsNumerator - b.oddsNumerator)[0];
-    // }
 
     const winnerId = winner.oddsNumerator - 1;
 
@@ -294,6 +306,7 @@ const iterate = () => {
 
   for (let i = 0; i < 30; i++) {
     data1.datasets[i].data.push(wins[i] / gamesPerHorse[i]);
+    data1.datasets[i + 30].data.push(expectedWins[i] / gamesPerHorse[i]);
   }
 
   data1.labels?.push(games);
@@ -316,14 +329,18 @@ const iterate = () => {
   const cohenW = Math.sqrt(totalChiSquare / games);
   data4.datasets[0].data.push(cohenW);
 
-  chart1.update("none");
-  chart2.update("none");
-  chart3.update("none");
-  chart4.update("none");
+  if (Date.now() - lastChartsUpdate > 1000) {
+    chart1.update("none");
+    chart2.update("none");
+    chart3.update("none");
+    chart4.update("none");
+    lastChartsUpdate = Date.now();
+  }
 
   iterations--;
   if (iterations >= 0 && !paused) {
-    requestAnimationFrame(iterate);
+    // requestAnimationFrame(iterate);
+    setTimeout(iterate);
   }
 };
 
@@ -331,5 +348,15 @@ const iterate = () => {
   window["horses"] = (await (await fetch("/api/horses")).json()) as Awaited<
     ReturnType<typeof getHorses>
   >;
+  window["historical"] = [];
+  window["historical"] = [
+    ...window["historical"],
+    ...(await (await fetch("/api/historical-data?type=1st")).json()),
+  ];
+  window["historical"] = [
+    ...window["historical"],
+    ...(await (await fetch("/api/historical-data?type=3rd")).json()),
+  ];
+
   iterate();
 })();

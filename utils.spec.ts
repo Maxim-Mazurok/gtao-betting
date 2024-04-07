@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getHorses } from "./fs-utils";
-import { generateLineUp } from "./utils";
-import { Horse } from ".";
+import { adjustChancesLikeOdds, generateLineUp } from "./utils";
 
 describe("generateLineUp", () => {
   it("should generate a line up of horses", async () => {
@@ -25,5 +24,13 @@ describe("generateLineUp", () => {
 
     // Assert
     expect(lineUp1).not.toEqual(lineUp2);
+  });
+});
+
+describe("adjustChancesLikeOdds", () => {
+  it("works", () => {
+    const chances = [10, 20, 30, 40];
+    const result = adjustChancesLikeOdds(chances);
+    expect(result).toEqual([0.1, 0.2, 0.3, 0.4]);
   });
 });

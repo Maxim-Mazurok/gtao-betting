@@ -1,7 +1,6 @@
 import Chart, { ChartData } from "chart.js/auto";
 import annotationPlugin from "chartjs-plugin-annotation";
 import jStat from "jstat";
-import { rando } from "@nastyox/rando.js";
 
 Chart.register(annotationPlugin);
 
@@ -52,9 +51,22 @@ const data3: ChartData = {
   ],
 };
 
+const data4: ChartData = {
+  labels: [] as number[],
+  datasets: [
+    {
+      label: "Cohen W",
+      data: [] as number[],
+      borderColor: "green",
+      backgroundColor: "green",
+    },
+  ],
+};
+
 const ctx1 = document.getElementById("chart1") as HTMLCanvasElement;
 const ctx2 = document.getElementById("chart2") as HTMLCanvasElement;
 const ctx3 = document.getElementById("chart3") as HTMLCanvasElement;
+const ctx4 = document.getElementById("chart4") as HTMLCanvasElement;
 
 let paused = false;
 document.getElementById("pause")?.addEventListener("change", (e) => {
@@ -139,6 +151,19 @@ const chart3 = new Chart(ctx3, {
   },
 });
 
+const chart4 = new Chart(ctx4, {
+  type: "line",
+  data: data4,
+  options: {
+    animation: false,
+    elements: {
+      point: {
+        radius: 0,
+      },
+    },
+  },
+});
+
 let iterations = 10000;
 
 let games = 0;
@@ -147,10 +172,9 @@ let blackWins = 0;
 let expectedRed = 0;
 
 const iterate = () => {
-  const batchSize = 10;
+  const batchSize = 1000000;
   for (let i = 0; i < batchSize; i++) {
-    // const color = Math.random() > 0.4 ? "Red" : "Black";
-    const color = rando(1, 10) > 4 ? "Red" : "Black";
+    const color = Math.random() > 0.5 ? "Red" : "Black";
     games++;
     if (color === "Red") {
       redWins++;
@@ -167,6 +191,7 @@ const iterate = () => {
   data1.labels?.push(games);
   data2.labels?.push(games);
   data3.labels?.push(games);
+  data4.labels?.push(games);
 
   const chiSquare = Math.pow(redWins - expectedRed, 2) / expectedRed;
   data2.datasets[0].data.push(chiSquare);
@@ -174,9 +199,14 @@ const iterate = () => {
   const significanceLevel = chiSquareRightTailArea(chiSquare, 1);
   data3.datasets[0].data.push(significanceLevel);
 
+  const cohenW = Math.sqrt(chiSquare / games);
+  data4.datasets[0].data.push(cohenW);
+
   chart1.update("none");
   chart2.update("none");
   chart3.update("none");
+  chart4.update("none");
+
   iterations--;
   if (iterations >= 0 && !paused) {
     requestAnimationFrame(iterate);

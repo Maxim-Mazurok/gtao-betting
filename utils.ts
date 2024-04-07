@@ -18,7 +18,12 @@ export const convertFractionOddsToDecimal = (
 
 export const calculateChances = (
   lineUp: LineUp,
-  type: "proportionate" | "first-horse" | "equal" = "proportionate"
+  type:
+    | "proportionate"
+    | "first-horse"
+    | "equal"
+    | "odds"
+    | "custom" = "proportionate"
 ): number[] => {
   const decimalOdds = lineUp.map((horse) =>
     convertFractionOddsToDecimal(horse.oddsNumerator, horse.oddsDenominator)
@@ -27,10 +32,20 @@ export const calculateChances = (
   if (type === "proportionate") return adjustChancesProportionally(oddsChances);
   if (type === "first-horse") return adjustChancesToFirstHorse(oddsChances);
   if (type === "equal") return adjustChancesEqually(oddsChances);
+  if (type === "odds") return adjustChancesLikeOdds(oddsChances);
+  if (type === "custom") {
+    const myOddsChances = oddsChances.map((x) => (x === 50 ? 65 : x));
+    const chances = adjustChancesEqually(myOddsChances);
+    return chances;
+  }
   throw new Error("Invalid type");
 
   // const adjustedChances =
   //   adjustGoodChancesToFirstHorseAndBadChancesToLast(oddsChances);
+};
+
+export const adjustChancesLikeOdds = (chances: number[]) => {
+  return chances.map((x) => x / 100);
 };
 
 export const adjustChancesEqually = (chances: number[]) => {
