@@ -7,23 +7,17 @@
     <script type="module" src="./index.ts"></script>
   </head>
   <body>
-    <p>
-      Distribution of wins by Nth favourite horse, when betting on the 1st
-      favourite:
-    </p>
+    <label>
+      Data Source:
+      <select id="data-source">
+        <option value="1st">when betting on 1st favourite</option>
+        <option value="3rd">when betting on 3rd favourite</option>
+        <option value="all" selected>all data</option>
+      </select>
+    </label>
+    <p>Distribution of wins by Nth favourite horse:</p>
     <canvas id="chart1"></canvas>
-    <p>
-      Distribution of wins by Nth favourite horse, when betting on the 3rd
-      favourite:
-    </p>
+    <p>Distribution of wins by Nth favourite horse:</p>
     <canvas id="chart2"></canvas>
-    <p>
-      Distribution of wins by horse group, when betting on the 1st favourite:
-    </p>
-    <canvas id="chart3"></canvas>
-    <p>
-      Distribution of wins by horse group, when betting on the 3rd favourite:
-    </p>
-    <canvas id="chart4"></canvas>
   </body>
 </html>

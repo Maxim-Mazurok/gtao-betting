@@ -159,3 +159,11 @@ function randomIntFromInterval(min: number, max: number) {
   // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+const DataSources = ["1st", "3rd", "all"] as const;
+export type DataSource = (typeof DataSources)[number];
+
+export const isValidDataSource = (
+  dataSource: unknown
+): dataSource is DataSource =>
+  typeof dataSource === "string" && DataSources.includes(dataSource as any);

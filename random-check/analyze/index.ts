@@ -4,12 +4,30 @@ import {
   calculateChances,
   convertFractionOddsToChance,
   convertFractionOddsToDecimal,
+  isValidDataSource,
   sortByOdds,
 } from "../../utils";
 
+const updateCharts = (value: unknown) => {
+  if (!isValidDataSource(value)) throw new Error("Invalid data source");
+
+  doIt(chart1, value, "horse");
+  doIt(chart2, value, "horse");
+};
+
+document.getElementById("data-source")?.addEventListener("change", (e) => {
+  const value = (e.target as HTMLSelectElement).value;
+  updateCharts(value);
+});
+
+const ctx1 = document.getElementById("chart1") as HTMLCanvasElement;
+const ctx2 = document.getElementById("chart2") as HTMLCanvasElement;
+const chart1 = new Chart(ctx1, { type: "bar" } as any);
+const chart2 = new Chart(ctx2, { type: "bar" } as any);
+
 const doIt = async (
-  chartCtx: HTMLCanvasElement,
-  historyType: "1st" | "3rd",
+  chart: Chart,
+  historyType: "1st" | "3rd" | "all",
   groupType: "horse" | "group"
 ) => {
   const response = await fetch(`/api/historical-data?type=${historyType}`);
@@ -85,48 +103,41 @@ const doIt = async (
     }
   });
 
-  new Chart(chartCtx, {
-    type: "bar",
-    data: {
-      labels: Object.keys(data.actualWins).map((x) =>
-        groupType === "group" ? x : Number(x) + 1
-      ),
-      datasets: [
-        {
-          label: "Actual Wins",
-          data: Object.values(data.actualWins) as number[],
-          borderColor: "blue",
-          backgroundColor: "blue",
-        },
-        {
-          label: "Adjusted Wins To First Horse",
-          data: Object.values(data.adjustedWinsToFirstHorse) as number[],
-          borderColor: "red",
-          backgroundColor: "red",
-        },
-        {
-          label: "Adjusted Wins Proportionately",
-          data: Object.values(data.adjustedWinsProportionately) as number[],
-          borderColor: "orange",
-          backgroundColor: "orange",
-        },
-        {
-          label: "Expected Wins By Odds",
-          data: Object.values(data.expectedWinsByOdds) as number[],
-          borderColor: "green",
-          backgroundColor: "green",
-        },
-      ],
-    },
-  });
+  chart.data = {
+    labels: Object.keys(data.actualWins).map((x) =>
+      groupType === "group" ? x : Number(x) + 1
+    ),
+    datasets: [
+      {
+        label: "Actual Wins",
+        data: Object.values(data.actualWins) as number[],
+        borderColor: "blue",
+        backgroundColor: "blue",
+      },
+      {
+        label: "Adjusted Wins To First Horse",
+        data: Object.values(data.adjustedWinsToFirstHorse) as number[],
+        borderColor: "red",
+        backgroundColor: "red",
+      },
+      {
+        label: "Adjusted Wins Proportionately",
+        data: Object.values(data.adjustedWinsProportionately) as number[],
+        borderColor: "orange",
+        backgroundColor: "orange",
+      },
+      {
+        label: "Expected Wins By Odds",
+        data: Object.values(data.expectedWinsByOdds) as number[],
+        borderColor: "green",
+        backgroundColor: "green",
+      },
+    ],
+  };
+
+  chart.update();
 };
 
-const ctx1 = document.getElementById("chart1") as HTMLCanvasElement;
-const ctx2 = document.getElementById("chart2") as HTMLCanvasElement;
-const ctx3 = document.getElementById("chart3") as HTMLCanvasElement;
-const ctx4 = document.getElementById("chart4") as HTMLCanvasElement;
-
-doIt(ctx1, "1st", "horse");
-doIt(ctx2, "3rd", "horse");
-doIt(ctx3, "1st", "group");
-doIt(ctx4, "3rd", "group");
+updateCharts(
+  (document.getElementById("data-source") as HTMLSelectElement).value
+);

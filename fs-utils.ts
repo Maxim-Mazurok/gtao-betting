@@ -1,14 +1,22 @@
 import { readFile } from "fs/promises";
 import { Horse, LineUp } from ".";
+import { DataSource } from "./utils";
 
 export const getHistoricalData = async (
-  type: "1st" | "3rd"
+  type: DataSource
 ): Promise<
   {
     lineUp: LineUp;
     winner: Horse;
   }[]
 > => {
+  if (type === "all") {
+    return Promise.all([
+      getHistoricalData("1st"),
+      getHistoricalData("3rd"),
+    ]).then(([data1, data3]) => [...data1, ...data3]);
+  }
+
   const horses = await getHorses();
 
   const lineUpsFile = await readFile(
