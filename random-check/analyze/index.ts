@@ -1,5 +1,5 @@
 import Chart from "chart.js/auto";
-import { getHistoricalData } from "../../fs-utils";
+import { getHistoricalData, getHorses } from "../../fs-utils";
 import {
   calculateChances,
   convertFractionOddsToChance,
@@ -8,11 +8,18 @@ import {
   sortByOdds,
 } from "../../utils";
 
-const updateCharts = (value: unknown) => {
-  if (!isValidDataSource(value)) throw new Error("Invalid data source");
+const updateCharts = async (dataSource: unknown) => {
+  if (!isValidDataSource(dataSource)) throw new Error("Invalid data source");
 
-  doIt(chart1, value, "horse");
-  doIt(chart2, value, "group");
+  const response = await fetch(`/api/historical-data?type=${dataSource}`);
+  const historicalData = (await response.json()) as Awaited<
+    ReturnType<typeof getHistoricalData>
+  >;
+
+  doIt(chart1, "horse", historicalData);
+  doIt(chart2, "group", historicalData);
+  doReturns(chart3, historicalData);
+  doReturnsLine(chart4, historicalData);
 };
 
 document.getElementById("data-source")?.addEventListener("change", (e) => {
@@ -20,20 +27,22 @@ document.getElementById("data-source")?.addEventListener("change", (e) => {
   updateCharts(value);
 });
 
-const ctx1 = document.getElementById("chart1") as HTMLCanvasElement;
-const ctx2 = document.getElementById("chart2") as HTMLCanvasElement;
-const chart1 = new Chart(ctx1, { type: "bar" } as any);
-const chart2 = new Chart(ctx2, { type: "bar" } as any);
+const initChart = (id: number, type: "bar" | "line" = "bar") => {
+  const ctx = document.getElementById(`chart${id}`) as HTMLCanvasElement;
+  // @ts-ignore
+  return new Chart(ctx, { type: type, options: { animation: false } });
+};
+
+const chart1 = initChart(1);
+const chart2 = initChart(2);
+const chart3 = initChart(3);
+const chart4 = initChart(4, "line");
 
 const doIt = async (
   chart: Chart,
-  historyType: "1st" | "3rd" | "all",
-  groupType: "horse" | "group"
+  groupType: "horse" | "group",
+  historicalData: Awaited<ReturnType<typeof getHistoricalData>>
 ) => {
-  const response = await fetch(`/api/historical-data?type=${historyType}`);
-  const historicalData = (await response.json()) as Awaited<
-    ReturnType<typeof getHistoricalData>
-  >;
   const data = {
     actualWins: {},
     expectedWinsByOdds: {},
@@ -136,6 +145,202 @@ const doIt = async (
   };
 
   chart.update();
+};
+
+const doReturns = async (
+  chart: Chart,
+  historicalData: Awaited<ReturnType<typeof getHistoricalData>>
+) => {
+  const horses = (await fetch("/api/horses").then((res) =>
+    res.json()
+  )) as Awaited<ReturnType<typeof getHorses>>;
+
+  chart.options.scales = {
+    y: {
+      min: 0,
+      max: 3,
+    },
+  };
+
+  const data = {
+    returns: {},
+    playedGames: {},
+    wonGames: {},
+  };
+
+  for (let i = 0; i < horses.length; i++) {
+    data.returns[i] = 0;
+    data.playedGames[i] = 0;
+    data.wonGames[i] = 0;
+  }
+
+  const next = (index = 0) => {
+    const { lineUp, winner } = historicalData[index];
+
+    lineUp.forEach((horse, i) => {
+      const id = horses.findIndex((x) => x.name === horse.name);
+
+      if (!data.returns[id]) data.returns[id] = 0;
+      if (!data.playedGames[id]) data.playedGames[id] = 0;
+      if (!data.wonGames[id]) data.wonGames[id] = 0;
+
+      data.playedGames[id] += 1;
+
+      if (JSON.stringify(horse) === JSON.stringify(winner)) {
+        data.wonGames[id] += 1;
+      }
+
+      data.returns[id] =
+        (convertFractionOddsToDecimal(
+          horse.oddsNumerator,
+          horse.oddsDenominator
+        ) *
+          data.wonGames[id]) /
+        data.playedGames[id];
+    });
+
+    chart.data = {
+      labels: Object.keys(data.returns),
+      datasets: [
+        {
+          label: "Returns",
+          data: Object.values(data.returns) as number[],
+          borderColor: "blue",
+          backgroundColor: horses.map((horse) => {
+            function getColor(value: number) {
+              var hue = ((1 - value) * 120).toString(10);
+              return ["hsl(", hue, ",100%,50%)"].join("");
+            }
+            return getColor(
+              convertFractionOddsToChance(
+                horse.oddsNumerator,
+                horse.oddsDenominator
+              ) * 2
+            );
+          }),
+        },
+      ],
+    };
+
+    chart.update();
+
+    if (index < historicalData.length - 1) {
+      setTimeout(() => next(index + 1), 1);
+    }
+  };
+
+  next();
+};
+
+const doReturnsLine = async (
+  chart: Chart,
+  historicalData: Awaited<ReturnType<typeof getHistoricalData>>
+) => {
+  const horses = (await fetch("/api/horses").then((res) =>
+    res.json()
+  )) as Awaited<ReturnType<typeof getHorses>>;
+
+  setInterval(() => {
+    chart.update("none");
+  }, 1000);
+
+  chart.options.scales = {
+    y: {
+      min: 0,
+      max: 3,
+    },
+  };
+  chart.options.elements = {
+    point: {
+      radius: 0,
+    },
+  };
+  // @ts-ignore
+  chart.options.spanGaps = true;
+
+  chart.data = {
+    labels: [],
+    datasets: [],
+  };
+
+  const localData = {
+    returns: [] as number[][],
+    playedGames: {},
+    wonGames: {},
+  };
+
+  function getColor(value: number) {
+    const hue = ((1 - value) * 120).toString(10);
+    const transparency = value.toString(10);
+
+    return `hsla(${hue},100%,50%,${transparency})`;
+  }
+
+  for (let i = 0; i < horses.length; i++) {
+    localData.playedGames[i] = 0;
+    localData.wonGames[i] = 0;
+
+    const color = getColor(
+      convertFractionOddsToChance(
+        horses[i].oddsNumerator,
+        horses[i].oddsDenominator
+      ) * 2
+    );
+
+    chart.data.datasets.push({
+      label: `#${i}`,
+      data: [] as number[],
+      borderColor: color,
+      backgroundColor: color,
+    });
+  }
+
+  const next = (index = 0) => {
+    chart.data.labels!.push(index);
+
+    const { lineUp, winner } = historicalData[index];
+    for (let i = 0; i < horses.length; i++) {
+      localData.returns[index] = [];
+      localData.returns[index][i] = 0;
+    }
+
+    lineUp.forEach((horse, i) => {
+      const id = horses.findIndex((x) => x.name === horse.name);
+
+      if (!localData.returns[id]) localData.returns[index][id] = 0;
+      if (!localData.playedGames[id]) localData.playedGames[id] = 0;
+      if (!localData.wonGames[id]) localData.wonGames[id] = 0;
+
+      localData.playedGames[id] += 1;
+
+      if (JSON.stringify(horse) === JSON.stringify(winner)) {
+        localData.wonGames[id] += 1;
+      }
+
+      localData.returns[index][id] =
+        (convertFractionOddsToDecimal(
+          horse.oddsNumerator,
+          horse.oddsDenominator
+        ) *
+          localData.wonGames[id]) /
+        localData.playedGames[id];
+    });
+
+    for (let i = 0; i < horses.length; i++) {
+      // @ts-ignore
+      chart.data.datasets[i].data[index] =
+        // localData.returns[index][i] || chart.data.datasets[i].data[index - 1];
+        localData.returns[index][i] || undefined;
+    }
+
+    if (index < historicalData.length - 1) {
+      // setTimeout(() => next(index + 1), 1);
+      requestAnimationFrame(() => next(index + 1));
+      // next(index + 1);
+    }
+  };
+
+  next();
 };
 
 updateCharts(
