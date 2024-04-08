@@ -12,7 +12,7 @@ const updateCharts = (value: unknown) => {
   if (!isValidDataSource(value)) throw new Error("Invalid data source");
 
   doIt(chart1, value, "horse");
-  doIt(chart2, value, "horse");
+  doIt(chart2, value, "group");
 };
 
 document.getElementById("data-source")?.addEventListener("change", (e) => {
