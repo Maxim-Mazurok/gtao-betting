@@ -73,6 +73,37 @@ export const convertScientificNotationNumber = (value: number): string => {
   return Number(value).toFixed(countOfDecimals);
 };
 
+export const getBetByReturns =
+  (log = false) =>
+  (lineUp: LineUp, currentMoney: number) => {
+    const order = [
+      5, 4, 3, 15, 14, 13, 12, 30, 29, 28, 27, 26, 25, 24, 10, 23, 22, 21, 20,
+      9, 19, 18, 17, 16, 8, 7, 6, 2, 1,
+    ];
+    for (let i = 0; i < order.length; i++) {
+      const horse = lineUp.find((h) => h.oddsNumerator === order[i]);
+      if (horse) {
+        return {
+          horse,
+          amount: 10000,
+        };
+      }
+    }
+
+    throw new Error("no horse found");
+  };
+
+export const getBetByOdds =
+  (log = false) =>
+  (lineUp: LineUp, currentMoney: number) => {
+    return {
+      horse: lineUp
+        .filter((x) => x.oddsNumerator !== 1)
+        .sort((a, b) => a.oddsNumerator - b.oddsNumerator)[0],
+      amount: 10000,
+    };
+  };
+
 export const getBetKelly =
   (log = false) =>
   (lineUp: LineUp, currentMoney: number) => {
@@ -167,10 +198,11 @@ export const getXthFavourite =
   };
 
 export const main = async (getBet: getBet, showBalance = false) => {
-  const historicalData = await getHistoricalData("1st");
+  let historicalData: Awaited<ReturnType<typeof getHistoricalData>> = [];
+  historicalData = await getHistoricalData("all");
   const horses = await getHorses();
   // const historicalData = shuffle(await getHistoricalData());
-  const totalGames = historicalData.length ?? 50;
+  const totalGames = historicalData.length || 2000;
   const startingMoney = 10_000_000;
   let currentMoney = startingMoney;
 
@@ -186,11 +218,11 @@ export const main = async (getBet: getBet, showBalance = false) => {
     }
   }
 
-  // console.log(
-  //   `${startingMoney.toLocaleString()} => ${Math.round(
-  //     currentMoney
-  //   ).toLocaleString()}`
-  // );
+  console.log(
+    `${startingMoney.toLocaleString()} => ${Math.round(
+      currentMoney
+    ).toLocaleString()}`
+  );
 };
 
 // basically the goal will be to find which horse will provide the closest match in bet for Kelly Criterion

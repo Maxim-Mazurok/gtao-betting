@@ -3,6 +3,8 @@ import {
   Horse,
   calculateNetWinnings,
   convertFractionOddsToPercentage,
+  getBetByOdds as getBetByOddsExceptEvens,
+  getBetByReturns,
   getBetKelly,
   getXthFavourite,
   main,
@@ -15,16 +17,34 @@ import {
 } from "./utils";
 
 it("works", async () => {
+  console.log("kelly");
   await main(getBetKelly(false), false);
+  console.log("1st favourite");
   await main(getXthFavourite(0, false), false);
+  console.log("2nd favourite");
+  await main(getXthFavourite(1, false), false);
+  console.log("3rd favourite");
+  await main(getXthFavourite(2, false), false);
+  console.log("4th favourite");
+  await main(getXthFavourite(3, false), false);
+  console.log("5th favourite");
+  await main(getXthFavourite(4, false), false);
+  console.log("6th favourite");
+  await main(getXthFavourite(5, false), false);
+  console.log("returns");
+  await main(getBetByReturns(), false);
+  console.log("odds except evens");
+  await main(getBetByOddsExceptEvens(), false);
 
   // await main(getBetKelly(false), true);
   // await main(getBetKelly(true), false);
+  // await main(getBetByReturns(), true);
+  // await main(getBetByOdds(), true);
   // await main(getXthFavourite(0), true);
   // await main(getXthFavourite(0, true, "proportionate"), false);
   // await main(getXthFavourite(0, true, "first-horse"), false);
   // await main(getXthFavourite(0, false), true);
-});
+}, 1000000);
 
 it("converts odds", () => {
   expect(convertFractionOddsToPercentage(1, 1)).toBe(0.5);

@@ -12,6 +12,9 @@ const main = async () => {
   const allLineUps1: any[] = [];
   const allLineUps2: any[] = [];
   let allLineUpsNumber = 0;
+  const totalLineUps = 1_175_353_344;
+
+  const start = Date.now();
 
   const racesByHorseId = [];
   const chancesByHorseId = [];
@@ -21,14 +24,24 @@ const main = async () => {
   });
 
   for (let f1 = 0; f1 < favourites.length; f1++) {
-    for (let f2 = f1 + 1; f2 < favourites.length; f2++) {
+    for (let f2 = 0; f2 < favourites.length; f2++) {
+      if (f1 === f2) continue;
       for (let o1 = 0; o1 < outsiders.length; o1++) {
-        for (let o2 = o1 + 1; o2 < outsiders.length; o2++) {
+        for (let o2 = 0; o2 < outsiders.length; o2++) {
+          if (o1 === o2) continue;
           for (let u1 = 0; u1 < underdogs.length; u1++) {
-            for (let u2 = u1 + 1; u2 < underdogs.length; u2++) {
+            for (let u2 = 0; u2 < underdogs.length; u2++) {
+              if (u1 === u2) continue;
               allLineUpsNumber++;
               if (allLineUpsNumber % 1_000_000 === 0) {
                 console.log({ allLineUpsNumber });
+                console.log(
+                  `Estimated time remaining: ${
+                    (((Date.now() - start) / allLineUpsNumber) *
+                      (totalLineUps - allLineUpsNumber)) /
+                    1000
+                  } seconds`
+                );
               }
               [
                 favourites[f1],
