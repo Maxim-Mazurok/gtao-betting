@@ -130,7 +130,7 @@ export const getHistoricalBalanceData = async (
   return dataArr;
 };
 
-export const getHorses = async () => {
+export const getHorses = async (): Promise<Array<Horse & { id: number }>> => {
   const horsesTxt = await readFile("./horses.txt", "utf-8");
   const parseHorse = (horse: string): Horse => {
     const name = horse.split(",")[0].trim();
@@ -153,6 +153,8 @@ export const getHorses = async () => {
       group,
     };
   };
-  const horses: Horse[] = horsesTxt.split(/\n|\r\n/).map(parseHorse);
+  const horses = horsesTxt
+    .split(/\n|\r\n/)
+    .map((line, index) => ({ ...parseHorse(line), id: index }));
   return horses;
 };
