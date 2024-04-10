@@ -24,7 +24,7 @@ export const getHistoricalData = async (
     "utf-8"
   );
   const lineUps: LineUp[] = lineUpsFile
-    .split("\n")
+    .split(/\n|\r\n/)
     .filter(Boolean)
     .map((line) => {
       const [
@@ -61,7 +61,7 @@ export const getHistoricalData = async (
     "utf-8"
   );
   const results: [Horse, Horse, Horse][] = resultsFile
-    .split("\n")
+    .split(/\n|\r\n/)
     .filter(Boolean)
     .map((line) => {
       const [
@@ -97,6 +97,39 @@ export const getHistoricalData = async (
   }));
 };
 
+export const getHistoricalBalanceData = async (
+  type: DataSource
+): Promise<
+  {
+    balance: number;
+    dateTime: string;
+  }[]
+> => {
+  if (type === "all") {
+    return Promise.all([
+      getHistoricalBalanceData("1st"),
+      getHistoricalBalanceData("3rd"),
+    ]).then(([data1, data3]) => [...data1, ...data3]);
+  }
+
+  const data = await readFile(
+    `./automation/bet_on_${type}_fav_log.csv`,
+    "utf-8"
+  );
+  const dataArr = data
+    .split(/\n|\r\n/)
+    .filter(Boolean)
+    .map((line) => {
+      const [balance, dateTime] = line.split(",");
+      return {
+        balance: Number(balance),
+        dateTime: dateTime.replaceAll('"', ""),
+      };
+    });
+
+  return dataArr;
+};
+
 export const getHorses = async () => {
   const horsesTxt = await readFile("./horses.txt", "utf-8");
   const parseHorse = (horse: string): Horse => {
@@ -120,6 +153,6 @@ export const getHorses = async () => {
       group,
     };
   };
-  const horses: Horse[] = horsesTxt.split("\n").map(parseHorse);
+  const horses: Horse[] = horsesTxt.split(/\n|\r\n/).map(parseHorse);
   return horses;
 };

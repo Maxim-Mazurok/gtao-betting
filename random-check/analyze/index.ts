@@ -1,5 +1,9 @@
 import Chart from "chart.js/auto";
-import { getHistoricalData, getHorses } from "../../fs-utils";
+import {
+  getHistoricalBalanceData,
+  getHistoricalData,
+  getHorses,
+} from "../../fs-utils";
 import {
   calculateChances,
   convertFractionOddsToChance,
@@ -7,19 +11,62 @@ import {
   isValidDataSource,
   sortByOdds,
 } from "../../utils";
+import { ma } from "moving-averages";
+import { differenceInSeconds } from "date-fns";
 
 const updateCharts = async (dataSource: unknown) => {
   if (!isValidDataSource(dataSource)) throw new Error("Invalid data source");
 
-  const response = await fetch(`/api/historical-data?type=${dataSource}`);
-  const historicalData = (await response.json()) as Awaited<
-    ReturnType<typeof getHistoricalData>
-  >;
+  const [historicalDataRes, historicalBalanceDataRes] = await Promise.all([
+    fetch(`/api/historical-data?type=${dataSource}`),
+    fetch(`/api/balance-log?type=${dataSource}`),
+  ]);
+  const [historicalData, historicalBalanceData] = await Promise.all([
+    historicalDataRes.json(),
+    historicalBalanceDataRes.json(),
+  ]);
 
   doIt(chart1, "horse", historicalData);
   doIt(chart2, "group", historicalData);
   doReturns(chart3, historicalData);
   doReturnsLine(chart4, historicalData);
+  movingAverageChart(chart0, historicalBalanceData);
+};
+
+const movingAverageChart = async (
+  chart: Chart,
+  historicalBalanceData: Awaited<ReturnType<typeof getHistoricalBalanceData>>
+) => {
+  const diffs: number[] = [];
+  for (let i = 1; i < historicalBalanceData.length; i++) {
+    const date1 = new Date(historicalBalanceData[i - 1].dateTime);
+    const date2 = new Date(historicalBalanceData[i].dateTime);
+    if (Math.abs(differenceInSeconds(date2, date1)) > 60) continue;
+    const diff =
+      historicalBalanceData[i].balance - historicalBalanceData[i - 1].balance;
+    diffs.push(diff);
+  }
+  const movingAverages = ma(diffs, 250);
+
+  chart.data = {
+    labels: movingAverages.map((_, i) => i),
+    datasets: [
+      {
+        label: "Moving Average",
+        data: movingAverages,
+        borderColor: "red",
+        backgroundColor: "red",
+      },
+    ],
+  };
+  chart.options = {
+    elements: {
+      point: {
+        radius: 0,
+      },
+    },
+  };
+  chart.update();
 };
 
 document.getElementById("data-source")?.addEventListener("change", (e) => {
@@ -33,6 +80,7 @@ const initChart = (id: number, type: "bar" | "line" = "bar") => {
   return new Chart(ctx, { type: type, options: { animation: false } });
 };
 
+const chart0 = initChart(0, "line");
 const chart1 = initChart(1);
 const chart2 = initChart(2);
 const chart3 = initChart(3);
@@ -147,13 +195,17 @@ const doIt = async (
   chart.update();
 };
 
+let horses: Awaited<ReturnType<typeof getHorses>> | undefined;
+
 const doReturns = async (
   chart: Chart,
   historicalData: Awaited<ReturnType<typeof getHistoricalData>>
 ) => {
-  const horses = (await fetch("/api/horses").then((res) =>
-    res.json()
-  )) as Awaited<ReturnType<typeof getHorses>>;
+  if (!horses) {
+    horses = (await fetch("/api/horses").then((res) => res.json())) as Awaited<
+      ReturnType<typeof getHorses>
+    >;
+  }
 
   chart.options.scales = {
     y: {
@@ -236,9 +288,11 @@ const doReturnsLine = async (
   chart: Chart,
   historicalData: Awaited<ReturnType<typeof getHistoricalData>>
 ) => {
-  const horses = (await fetch("/api/horses").then((res) =>
-    res.json()
-  )) as Awaited<ReturnType<typeof getHorses>>;
+  if (!horses) {
+    horses = (await fetch("/api/horses").then((res) => res.json())) as Awaited<
+      ReturnType<typeof getHorses>
+    >;
+  }
 
   setInterval(() => {
     chart.update("none");
