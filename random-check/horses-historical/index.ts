@@ -348,15 +348,13 @@ const iterate = () => {
   window["horses"] = (await (await fetch("/api/horses")).json()) as Awaited<
     ReturnType<typeof getHorses>
   >;
-  window["historical"] = [];
-  window["historical"] = [
-    ...window["historical"],
-    ...(await (await fetch("/api/historical-data?type=1st")).json()),
-  ];
-  window["historical"] = [
-    ...window["historical"],
-    ...(await (await fetch("/api/historical-data?type=3rd")).json()),
-  ];
+  window["historical"] = await (
+    await fetch(
+      `/api/historical-data?type=${
+        (document.getElementById("data-source") as HTMLSelectElement).value
+      }`
+    )
+  ).json();
 
   iterate();
 })();
