@@ -283,7 +283,7 @@ let expectedWins = Array.from({ length: 30 }, () => 0);
 let lastChartsUpdate = Date.now();
 
 const iterate = () => {
-  const batchSize = 1;
+  const batchSize = 10;
   for (let i = 0; i < batchSize; i++) {
     const gameData = (
       window["historical"] as Awaited<ReturnType<typeof getHistoricalData>>
@@ -339,8 +339,8 @@ const iterate = () => {
 
   iterations--;
   if (iterations >= 0 && !paused) {
-    // requestAnimationFrame(iterate);
-    setTimeout(iterate);
+    requestAnimationFrame(iterate);
+    // setTimeout(iterate);
   }
 };
 
