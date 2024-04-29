@@ -353,49 +353,58 @@ const doReturnsLine = async (
     });
   }
 
-  const next = (index = 0) => {
-    chart.data.labels!.push(index);
+  const next = () => {
+    const iterate = () => {
+      const index = chart.data.labels.length;
 
-    const { lineUp, winner } = historicalData[index];
-    for (let i = 0; i < horses.length; i++) {
-      localData.returns[index] = [];
-      localData.returns[index][i] = 0;
-    }
+      if (!historicalData[index]) return;
 
-    lineUp.forEach((horse, i) => {
-      const id = horses.findIndex((x) => x.name === horse.name);
+      chart.data.labels!.push(index);
 
-      if (!localData.returns[id]) localData.returns[index][id] = 0;
-      if (!localData.playedGames[id]) localData.playedGames[id] = 0;
-      if (!localData.wonGames[id]) localData.wonGames[id] = 0;
+      const { lineUp, winner } = historicalData[index];
 
-      localData.playedGames[id] += 1;
-
-      if (JSON.stringify(horse) === JSON.stringify(winner)) {
-        localData.wonGames[id] += 1;
+      for (let i = 0; i < horses.length; i++) {
+        localData.returns[index] = [];
+        localData.returns[index][i] = 0;
       }
 
-      localData.returns[index][id] =
-        (convertFractionOddsToDecimal(
-          horse.oddsNumerator,
-          horse.oddsDenominator
-        ) *
-          localData.wonGames[id]) /
-        localData.playedGames[id];
-    });
+      lineUp.forEach((horse, i) => {
+        const id = horses.findIndex((x) => x.name === horse.name);
 
-    for (let i = 0; i < horses.length; i++) {
-      // @ts-ignore
-      chart.data.datasets[i].data[index] =
-        // localData.returns[index][i] || chart.data.datasets[i].data[index - 1];
-        localData.returns[index][i] || undefined;
+        if (!localData.returns[id]) localData.returns[index][id] = 0;
+        if (!localData.playedGames[id]) localData.playedGames[id] = 0;
+        if (!localData.wonGames[id]) localData.wonGames[id] = 0;
+
+        localData.playedGames[id] += 1;
+
+        if (JSON.stringify(horse) === JSON.stringify(winner)) {
+          localData.wonGames[id] += 1;
+        }
+
+        localData.returns[index][id] =
+          (convertFractionOddsToDecimal(
+            horse.oddsNumerator,
+            horse.oddsDenominator
+          ) *
+            localData.wonGames[id]) /
+          localData.playedGames[id];
+      });
+
+      for (let i = 0; i < horses.length; i++) {
+        // @ts-ignore
+        chart.data.datasets[i].data[index] =
+          // localData.returns[index][i] || chart.data.datasets[i].data[index - 1];
+          localData.returns[index][i] || undefined;
+      }
+    };
+
+    for (let i = 0; i < 50; i++) {
+      iterate();
     }
 
-    if (index < historicalData.length - 1) {
-      // setTimeout(() => next(index + 1), 1);
-      requestAnimationFrame(() => next(index + 1));
-      // next(index + 1);
-    }
+    setTimeout(next, 1000);
+    // requestAnimationFrame(() => next());
+    // next(index + 1);
   };
 
   next();
