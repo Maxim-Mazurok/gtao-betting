@@ -406,7 +406,8 @@ def select_bet_amount():
 
 
 # seems like 1h per day is the limit for GTAO before you get banned from betting for about 1-1.5 weeks
-SESSION_LIMIT_HOURS = 0.95
+# SESSION_LIMIT_HOURS = 0.95
+SESSION_LIMIT_HOURS = 999
 
 
 def main():
