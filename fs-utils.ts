@@ -86,7 +86,7 @@ export const getHistoricalData = async (
   for (let i = 0; i < lineUps.length; i++) {
     for (let j = 0; j < 3; j++) {
       if (!lineUps[i].includes(results[i][j])) {
-        throw new Error(`result #${j} not in lineUp ${i}`);
+        throw new Error(`result #${j} [${results[i][j].name}] not in lineUp ${i}`);
       }
     }
   }
