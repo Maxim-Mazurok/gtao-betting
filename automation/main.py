@@ -255,9 +255,12 @@ def click_in_the_middle_of_crop(crop_coords, click_type='down-and-up'):
 
         # Move the mouse to the center point and click
         pydirectinput.moveTo(screen_center_x, screen_center_y)
+        time.sleep(0.1)
+        # sometimes it doesn't move on the first try
+        pydirectinput.moveTo(screen_center_x, screen_center_y)
 
-        # increase delay, looks like sometimes the cursor is still on the "Bet Again" button which is actually "Rules" button by that time, not sure tho
-        time.sleep(0.5)
+        # tried increase delay, looked like sometimes the cursor is still on the "Bet Again" button which is actually "Rules" button by that time, but didn't help
+        time.sleep(0.1)
 
         if click_type == 'down-and-up':
             pydirectinput.press('enter')
