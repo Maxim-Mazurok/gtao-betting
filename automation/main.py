@@ -5,9 +5,10 @@ import time
 import win32gui
 import easyocr
 import numpy as np
-import pyautogui
 import Levenshtein as lev
 import keyboard
+import mss
+import mss.tools
 
 BET_ON = "1st"
 # BET_ON = "3rd"
@@ -128,43 +129,51 @@ def activate_game_window():
 def capture_game_screen(save_screen=False):
     if PAUSED:
         return None
-    try:
-        # Find the window
-        window = gw.getWindowsWithTitle(GAME_TITLE)[0]
-        if window:
-            # Get the handle to the window
-            hwnd = window._hWnd
 
-            # Get the position of the window's client area
-            client_rect = win32gui.GetClientRect(hwnd)
-            client_left, client_top, client_right, client_bottom = client_rect
+    # Find the window by title
+    window = gw.getWindowsWithTitle(GAME_TITLE)[0]
+    if window:
+        # Get the handle to the window
+        hwnd = window._hWnd
 
-            # Map the client area position to the screen
-            screen_left, screen_top = win32gui.ClientToScreen(
-                hwnd, (client_left, client_top))
+        # Get the position of the window's client area
+        client_rect = win32gui.GetClientRect(hwnd)
+        client_left, client_top, client_right, client_bottom = client_rect
 
-            # print(f"client_left: {screen_left}, client_top: {screen_top}")
+        # Map the client area position to the screen
+        screen_left, screen_top = win32gui.ClientToScreen(
+            hwnd, (client_left, client_top))
 
-            screen_right, screen_bottom = win32gui.ClientToScreen(
-                hwnd, (client_right, client_bottom))
+        screen_right, screen_bottom = win32gui.ClientToScreen(
+            hwnd, (client_right, client_bottom))
 
-            # Calculate width and height
-            width = screen_right - screen_left
-            height = screen_bottom - screen_top
+        # Calculate width and height
+        width = screen_right - screen_left
+        height = screen_bottom - screen_top
 
-            # Capture the screen
-            screenshot = pyautogui.screenshot(
-                region=(screen_left, screen_top, width, height))
+        with mss.mss() as sct:
+            # Define the monitor region to capture based on the window's rectangle
+            monitor = {
+                "top": screen_top,
+                "left": screen_left,
+                "width": width,
+                "height": height,
+                "mon": -1,  # Monitor index isn't needed here
+            }
+
+            # Capture the specified region
+            sct_img = sct.grab(monitor)
 
             if save_screen:
-                # Save or process the screenshot
-                screenshot.save('screenshot.png')
-            return screenshot
-        else:
-            print(f"{GAME_TITLE} window not found.")
-            return None
-    except Exception as e:
-        print(f"An error occurred: {e}")
+                # Save the screenshot
+                output_filename = "screenshot.png"
+                mss.tools.to_png(sct_img.rgb, sct_img.size,
+                                 output=output_filename)
+                print(f"Screenshot saved as {output_filename}")
+
+            return sct_img
+    else:
+        print(f"Window titled '{GAME_TITLE}' not found.")
         return None
 
 
@@ -212,7 +221,12 @@ def visualize_crop(name, crop):
 
 def get_text_from_crop(crop_coords):
     screen = capture_game_screen()
-    crop = screen.crop(crop_coords)
+
+    # Convert the screenshot to a PIL Image object
+    img = Image.frombytes("RGB", screen.size, screen.bgra, "raw", "BGRX")
+
+    # Now you can crop it
+    crop = img.crop(crop_coords)
     crop_np = np.array(crop)
     results = reader.readtext(crop_np)
     text = ' '.join([result[1] for result in results])
@@ -418,6 +432,7 @@ SESSION_LIMIT_HOURS = 999
 def main():
     global PAUSED
 
+    # activate_game_window()
     # capture_game_screen(True)
     # exit()
     # visualize_all_crops()
