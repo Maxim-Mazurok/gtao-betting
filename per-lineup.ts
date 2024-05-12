@@ -4,6 +4,7 @@ import { calculateChances, convertFractionOddsToChance } from "./utils";
 
 const GROUP_BY_N_FIRST_HORSES = 2;
 
+
 (async () => {
   const historicalData = await getHistoricalData("all");
   const lineUpWins = new Map<
