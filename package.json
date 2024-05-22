@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "vitest",
-    "start": "tsx index.ts",
-    "dev": "concurrently \"npm:server\" \"vite\"",
-    "server": "nodemon --exec tsx random-check/server.ts"
+    "test": "npx vitest --run",
+    "start": "npx tsx index.ts",
+    "dev": "npx concurrently \"npm:server\" \"vite\"",
+    "server": "npx nodemon --exec tsx random-check/server.ts"
   },
   "author": "",
   "license": "ISC",
