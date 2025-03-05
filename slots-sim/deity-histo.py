@@ -39,7 +39,7 @@ def calculate_payout(reels):
     return payout
 
 # Monte Carlo Simulation
-def monte_carlo_simulation(num_games=5000, bet_amount=2500):
+def monte_carlo_simulation(num_games=10745, bet_amount=2500):
     balance = 0
     
     for _ in range(num_games):
@@ -51,10 +51,10 @@ def monte_carlo_simulation(num_games=5000, bet_amount=2500):
     
     return balance
 
-# Run initial 5000 simulations
+# Run initial 10745 simulations
 num_simulations = 10
 final_balances = [monte_carlo_simulation() for _ in range(num_simulations)]
-total_games = num_simulations * 5000
+total_games = num_simulations * 10745
 
 # Function to continuously run simulations and update plot
 def continuous_simulation():
@@ -62,7 +62,7 @@ def continuous_simulation():
     while True:
         new_balances = [monte_carlo_simulation() for _ in range(10)]
         final_balances.extend(new_balances)
-        total_games += 10 * 5000  # Update total games played
+        total_games += 10 * 10745  # Update total games played
         
         avg_balance = np.mean(final_balances)
         median_balance = np.median(final_balances)
@@ -73,9 +73,10 @@ def continuous_simulation():
         ax.axvline(0, color='red', linestyle='--', label='Break-even')
         ax.axvline(avg_balance, color='green', linestyle='--', label=f'Avg Balance: {int(avg_balance):,}')
         ax.axvline(median_balance, color='orange', linestyle='--', label=f'Median Balance: {int(median_balance):,}')
+        ax.axvline(2110000, color='purple', linestyle='--', label='My Actual Result')
         ax.set_xlabel('Final Balance')
         ax.set_ylabel('Frequency')
-        ax.set_title(f'Distribution of Final Balances After 5000 Games ({len(final_balances)} Simulations)\nROI: {roi:.2f}%')
+        ax.set_title(f'Distribution of Final Balances After 10745 Games ({len(final_balances)} Simulations)\nROI: {roi:.2f}%')
         ax.legend()
         ax.grid()
         ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f'{int(x):,}'))
@@ -87,9 +88,10 @@ ax.hist(final_balances, bins=50, color='blue', edgecolor='black', alpha=0.7)
 ax.axvline(0, color='red', linestyle='--', label='Break-even')
 ax.axvline(np.mean(final_balances), color='green', linestyle='--', label=f'Avg Balance: {int(np.mean(final_balances)):,}')
 ax.axvline(np.median(final_balances), color='orange', linestyle='--', label=f'Median Balance: {int(np.median(final_balances)):,}')
+ax.axvline(2110000, color='purple', linestyle='--', label='My Actual Result')
 ax.set_xlabel('Final Balance')
 ax.set_ylabel('Frequency')
-ax.set_title(f'Distribution of Final Balances After 5000 Games ({num_simulations} Simulations)')
+ax.set_title(f'Distribution of Final Balances After 10745 Games ({num_simulations} Simulations)')
 ax.legend()
 ax.grid()
 
