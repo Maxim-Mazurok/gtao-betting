@@ -185,9 +185,10 @@ def get_text_from_crop(crop_coords):
 
 
 def wait_for_text(text, crop_coords, timeout=None, distance_threshold=1):
+    print (f"Waiting for text: {text}")
     while True:
         found_text = get_text_from_crop(crop_coords)
-        # print(f"Found text: {found_text}")
+        print(f"Found text: {found_text}")
         if lev.distance(normalize_string(text), normalize_string(found_text)) <= distance_threshold:
             break
         time.sleep(0.5)
